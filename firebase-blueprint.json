@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "anime": {
+      "title": "Anime",
+      "description": "Details for an anime entry on the main grid.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Display name of the anime" },
+        "thumbnail": { "type": "string", "description": "URL of the thumbnail image" },
+        "link": { "type": "string", "description": "URL to redirect to when clicked" },
+        "clicks": { "type": "number", "description": "Counter for clicks" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["title", "thumbnail", "link"]
+    },
+    "banner": {
+      "title": "Promo Banner",
+      "description": "Promotional banners for the top carousel.",
+      "type": "object",
+      "properties": {
+        "imageUrl": { "type": "string" },
+        "link": { "type": "string" },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["imageUrl", "link"]
+    },
+    "stats": {
+      "title": "Daily Stats",
+      "description": "Global statistics for tracking user visits and interactions.",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "visits": { "type": "number" },
+        "totalClicks": { "type": "number" }
+      },
+      "required": ["date"]
+    }
+  },
+  "firestore": {
+    "anime": {
+      "schema": "anime",
+      "description": "List of available anime entries."
+    },
+    "banners": {
+      "schema": "banner",
+      "description": "Promotional banners for the home screen."
+    },
+    "stats": {
+      "schema": "stats",
+      "description": "Daily usage statistics."
+    }
+  }
+}
