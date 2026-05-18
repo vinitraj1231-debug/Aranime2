@@ -28,8 +28,9 @@ export default function Login({ user }: LoginProps) {
       await signInWithPopup(auth, provider);
     } catch (err: any) {
       if (err.code === 'auth/cancelled-popup-request') {
-        // User closed the popup, ignore or just reset state
         console.log("Login popup closed by user");
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError(`Domain not authorized. Please add "${window.location.hostname}" to Firebase Console > Authentication > Settings > Authorized Domains.`);
       } else {
         console.error(err);
         setError(err.message || "An error occurred during login");
