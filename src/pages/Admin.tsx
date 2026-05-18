@@ -16,9 +16,11 @@ export default function Admin({ currentUserEmail }: AdminProps) {
   const [searchQuery, setSearchQuery] = useState("");
   
   // Forms
-  const [animeForm, setAnimeForm] = useState({ title: '', thumbnail: '', link: '' });
+  const [animeForm, setAnimeForm] = useState({ title: '', thumbnail: '', link: '', category: 'Action' });
   const [bannerForm, setBannerForm] = useState({ imageUrl: '', link: '', order: 0 });
   const [adminForm, setAdminForm] = useState({ email: '' });
+
+  const categories = ["Action", "Comedy", "Drama", "Fantasy", "Romance", "Sci-Fi", "Slice of Life", "Adventure", "Supernatural"];
 
   useEffect(() => {
     const unsubAnime = onSnapshot(query(collection(db, "anime"), orderBy("createdAt", "desc")), (snap) => 
@@ -36,7 +38,7 @@ export default function Admin({ currentUserEmail }: AdminProps) {
   const handleAddAnime = async (e: FormEvent) => {
     e.preventDefault();
     await addDoc(collection(db, "anime"), { ...animeForm, clicks: 0, createdAt: serverTimestamp(), isActive: true });
-    setAnimeForm({ title: '', thumbnail: '', link: '' });
+    setAnimeForm({ title: '', thumbnail: '', link: '', category: 'Action' });
   };
 
   const handleAddBanner = async (e: FormEvent) => {
@@ -93,11 +95,21 @@ export default function Admin({ currentUserEmail }: AdminProps) {
           <div className="space-y-8">
             <section className="bg-bg-dark p-6 rounded-2xl border border-white/5">
               <h2 className="text-lg font-bold mb-6 flex items-center gap-2 italic uppercase tracking-tight"><Plus className="w-5 h-5 text-brand" /> Add New Series</h2>
-              <form onSubmit={handleAddAnime} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Input label="Anime Title" value={animeForm.title} onChange={v => setAnimeForm({...animeForm, title: v})} required placeholder="e.g. Naruto Shippuden" />
-                <Input label="Landscape Thumbnail" value={animeForm.thumbnail} onChange={v => setAnimeForm({...animeForm, thumbnail: v})} required placeholder="URL to JPEG/PNG" />
-                <Input label="Target Redirect Link" value={animeForm.link} onChange={v => setAnimeForm({...animeForm, link: v})} required placeholder="Telegram/Mega Link" />
-                <button className="sm:col-span-full lg:col-span-1 bg-brand hover:bg-brand-dark transition-all py-3 rounded-xl font-bold h-[45px] mt-auto">Push Series Live</button>
+              <form onSubmit={handleAddAnime} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Input label="Anime Title" value={animeForm.title} onChange={(v: string) => setAnimeForm({...animeForm, title: v})} required placeholder="e.g. Naruto Shippuden" />
+                <Input label="Landscape Thumbnail" value={animeForm.thumbnail} onChange={(v: string) => setAnimeForm({...animeForm, thumbnail: v})} required placeholder="URL to JPEG/PNG" />
+                <Input label="Target Redirect Link" value={animeForm.link} onChange={(v: string) => setAnimeForm({...animeForm, link: v})} required placeholder="Telegram/Mega Link" />
+                <div className="flex flex-col gap-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2">Category</label>
+                  <select 
+                    value={animeForm.category}
+                    onChange={e => setAnimeForm({...animeForm, category: e.target.value})}
+                    className="bg-bg-darker border border-white/10 focus:border-brand/40 rounded-xl p-3 outline-none transition-all text-sm text-white h-[45px]"
+                  >
+                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  </select>
+                </div>
+                <button className="sm:col-span-full lg:col-span-4 bg-brand hover:bg-brand-dark transition-all py-3 rounded-xl font-bold h-[45px] mt-auto">Push Series Live</button>
               </form>
             </section>
 
@@ -125,6 +137,7 @@ export default function Admin({ currentUserEmail }: AdminProps) {
                       <p className="text-[10px] text-white/30 truncate mt-1">{item.link}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <span className="text-[9px] bg-brand/10 text-brand px-2 py-0.5 rounded font-black uppercase">{item.clicks} Views</span>
+                        {item.category && <span className="text-[9px] bg-white/5 text-white/40 px-2 py-0.5 rounded font-bold uppercase">{item.category}</span>}
                       </div>
                     </div>
                     <button onClick={() => handleDelete('anime', item.id)} className="p-2 hover:bg-red-500/10 text-white/10 hover:text-red-500 transition-colors">

@@ -9,10 +9,11 @@ interface Anime {
   title: string;
   thumbnail: string;
   link: string;
+  category?: string;
   clicks: number;
 }
 
-export default function AnimeGrid({ search = "" }: { search?: string }) {
+export default function AnimeGrid({ search = "", category = "All" }: { search?: string, category?: string }) {
   const [items, setItems] = useState<Anime[]>([]);
 
   useEffect(() => {
@@ -22,9 +23,11 @@ export default function AnimeGrid({ search = "" }: { search?: string }) {
     });
   }, []);
 
-  const filteredItems = items.filter(item => 
-    item.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredItems = items.filter(item => {
+    const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = category === "All" || item.category === category;
+    return matchesSearch && matchesCategory;
+  });
 
   const handleLinkClick = async (id: string, link: string) => {
     try {

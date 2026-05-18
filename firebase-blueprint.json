@@ -8,6 +8,7 @@
         "title": { "type": "string", "description": "Display name of the anime" },
         "thumbnail": { "type": "string", "description": "URL of the thumbnail image" },
         "link": { "type": "string", "description": "URL to redirect to when clicked" },
+        "category": { "type": "string", "description": "Genre/Category of the anime" },
         "clicks": { "type": "number", "description": "Counter for clicks" },
         "createdAt": { "type": "string", "format": "date-time" },
         "isActive": { "type": "boolean" }

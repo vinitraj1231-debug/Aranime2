@@ -5,6 +5,7 @@ interface AnimeCardProps {
     title: string;
     thumbnail: string;
     clicks: number;
+    category?: string;
   };
   onClick: () => void;
 }
@@ -31,13 +32,20 @@ export default function AnimeCard({ anime, onClick }: AnimeCardProps) {
         </div>
 
         {/* View Count Badge */}
-        <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded text-[10px] font-bold text-white/90 border border-white/10 uppercase tracking-wider">
+        <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded text-[10px] font-bold text-white/90 border border-white/10 uppercase tracking-wider text-white">
           {anime.clicks} Views
         </div>
+
+        {/* Category Badge */}
+        {anime.category && (
+          <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-brand/90 backdrop-blur-sm rounded text-[9px] font-black text-white uppercase tracking-tighter shadow-md">
+            {anime.category}
+          </div>
+        )}
       </div>
       
       <div className="px-1">
-        <h3 className="font-semibold text-sm line-clamp-2 leading-tight group-hover:text-brand transition-colors">
+        <h3 className="font-semibold text-sm line-clamp-2 leading-tight group-hover:text-brand transition-colors text-white">
           {anime.title}
         </h3>
         <p className="text-[10px] text-white/40 font-mono mt-1 uppercase tracking-tighter">
