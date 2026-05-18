@@ -1,6 +1,6 @@
 {
-  "name": "AnimeHub Mini App",
-  "description": "An advanced anime content management and distribution platform tailored for Telegram Mini Apps, featuring an administration panel, trackable links, and promotional banners.",
+  "name": "AR ANIME",
+  "description": "An advanced anime platform and Telegram mini app with admin management, content distribution, and analytics.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

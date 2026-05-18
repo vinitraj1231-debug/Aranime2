@@ -14,30 +14,25 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.token.email == 'kvinit6421@gmail.com' && 
-        request.auth.token.email_verified == true
+        request.auth.token.email == 'kvinit6421@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.token.email))
       );
     }
 
-    function isValidId(id) {
-      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
-    }
-
-    function incoming() {
-      return request.resource.data;
+    // Admin List Rules
+    match /admins/{email} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
     }
 
     // Anime Rules
     match /anime/{animeId} {
-      allow read: if true; // Public can see anime entries
+      allow read: if true;
       allow write: if isAdmin();
       
-      // Allow incrementing clicks even for non-admins if we want to track it from client
-      // However, usually better to track clicks via specific path or server proxy to avoid abuse
-      // For this simple version, we'll allow partial update for clicks
       allow update: if (
         (isAdmin()) || 
-        (incoming().diff(resource.data).affectedKeys().hasOnly(['clicks']) && incoming().clicks == resource.data.clicks + 1)
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clicks']))
       );
     }
 

@@ -36,6 +36,16 @@
         "totalClicks": { "type": "number" }
       },
       "required": ["date"]
+    },
+    "admins": {
+      "title": "Admin",
+      "description": "User emails that have administrative access.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "addedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email"]
     }
   },
   "firestore": {
@@ -50,6 +60,10 @@
     "stats": {
       "schema": "stats",
       "description": "Daily usage statistics."
+    },
+    "admins": {
+      "schema": "admins",
+      "description": "Authorized administrators."
     }
   }
 }

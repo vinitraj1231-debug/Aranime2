@@ -12,7 +12,7 @@ interface Anime {
   clicks: number;
 }
 
-export default function AnimeGrid() {
+export default function AnimeGrid({ search = "" }: { search?: string }) {
   const [items, setItems] = useState<Anime[]>([]);
 
   useEffect(() => {
@@ -22,14 +22,15 @@ export default function AnimeGrid() {
     });
   }, []);
 
+  const filteredItems = items.filter(item => 
+    item.title.toLowerCase().includes(search.toLowerCase())
+  );
+
   const handleLinkClick = async (id: string, link: string) => {
     try {
-      // Increment clicks in Firestore
       await updateDoc(doc(db, "anime", id), {
         clicks: increment(1)
       });
-      // Increment daily clicks global stat if we really want to track everything
-      // For now, anime level is enough
       window.open(link, '_blank');
     } catch (e) {
       console.error(e);
@@ -39,7 +40,7 @@ export default function AnimeGrid() {
 
   return (
     <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4">
-      {items.map((item, index) => (
+      {filteredItems.map((item, index) => (
         <motion.div
           key={item.id}
           initial={{ opacity: 0, scale: 0.9 }}
@@ -50,10 +51,10 @@ export default function AnimeGrid() {
         </motion.div>
       ))}
       
-      {items.length === 0 && (
+      {filteredItems.length === 0 && (
         <div className="col-span-full py-20 text-center text-white/30">
-          <p className="text-lg">No anime available yet.</p>
-          <p className="text-sm">Come back later or log in as admin to add some!</p>
+          <p className="text-lg">No anime found{search ? ` for "${search}"` : ""}.</p>
+          <p className="text-sm">Try a different search term or come back later!</p>
         </div>
       )}
     </div>
