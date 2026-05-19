@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { BannerSkeleton } from "./Skeleton";
 
 interface Banner {
   id: string;
@@ -30,7 +31,7 @@ export default function BannerCarousel() {
     return () => clearInterval(timer);
   }, [banners.length]);
 
-  if (banners.length === 0) return null;
+  if (banners.length === 0) return <BannerSkeleton />;
 
   const next = () => setCurrentIndex((prev) => (prev + 1) % banners.length);
   const prev = () => setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
@@ -43,15 +44,17 @@ export default function BannerCarousel() {
           href={banners[currentIndex].link}
           target="_blank"
           rel="noopener noreferrer"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className="absolute inset-0 block"
         >
           <img 
             src={banners[currentIndex].imageUrl} 
             alt="Promotion"
             className="w-full h-full object-cover"
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-bg-darker via-transparent to-transparent opacity-60" />
         </motion.a>

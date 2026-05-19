@@ -32,25 +32,27 @@ export default function AnimeCard({ anime, onClick }: AnimeCardProps) {
         </div>
 
         {/* View Count Badge */}
-        <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded text-[10px] font-bold text-white/90 border border-white/10 uppercase tracking-wider text-white">
-          {anime.clicks} Views
+        <div className="absolute top-2 right-2 px-2 py-1 bg-black/70 backdrop-blur-md rounded-md text-[10px] font-black text-white/90 border border-white/10 uppercase tracking-widest shadow-xl flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 bg-brand rounded-full animate-pulse" />
+          {anime.clicks.toLocaleString()} VIEWS
         </div>
 
         {/* Category Badge */}
         {anime.category && (
-          <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-brand/90 backdrop-blur-sm rounded text-[9px] font-black text-white uppercase tracking-tighter shadow-md">
+          <div className="absolute top-2 left-2 px-2.5 py-1 bg-brand/90 backdrop-blur-sm rounded-md text-[9px] font-black text-white uppercase tracking-tighter shadow-lg border border-white/20">
             {anime.category}
           </div>
         )}
       </div>
       
-      <div className="px-1">
-        <h3 className="font-semibold text-sm line-clamp-2 leading-tight group-hover:text-brand transition-colors text-white">
+      <div className="px-1 mt-1">
+        <h3 className="font-bold text-[13px] sm:text-sm line-clamp-2 leading-snug group-hover:text-brand transition-colors text-white/90 tracking-tight">
           {anime.title}
         </h3>
-        <p className="text-[10px] text-white/40 font-mono mt-1 uppercase tracking-tighter">
-          Subtitled | Dubbed
-        </p>
+        <div className="flex items-center gap-2 mt-1.5">
+           <span className="text-[9px] text-white/30 font-black uppercase tracking-[0.1em] px-1.5 py-0.5 border border-white/5 rounded italic">HD</span>
+           <span className="text-[9px] text-white/30 font-bold uppercase tracking-wider">Sub | Dub</span>
+        </div>
       </div>
     </button>
   );

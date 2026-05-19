@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, increment } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import AnimeCard from "./AnimeCard";
+import { CardSkeleton } from "./Skeleton";
 
 interface Anime {
   id: string;
@@ -15,11 +16,13 @@ interface Anime {
 
 export default function AnimeGrid({ search = "", category = "All" }: { search?: string, category?: string }) {
   const [items, setItems] = useState<Anime[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const q = query(collection(db, "anime"), orderBy("createdAt", "desc"));
     return onSnapshot(q, (snapshot) => {
       setItems(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Anime)));
+      setLoading(false);
     });
   }, []);
 
@@ -41,18 +44,34 @@ export default function AnimeGrid({ search = "", category = "All" }: { search?: 
     }
   };
 
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4">
+        {[...Array(12)].map((_, i) => <CardSkeleton key={i} />)}
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4">
-      {filteredItems.map((item, index) => (
-        <motion.div
-          key={item.id}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: index * 0.05 }}
-        >
-          <AnimeCard anime={item} onClick={() => handleLinkClick(item.id, item.link)} />
-        </motion.div>
-      ))}
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-8 gap-x-4 p-4">
+      <AnimatePresence mode="popLayout">
+        {filteredItems.map((item, index) => (
+          <motion.div
+            key={item.id}
+            layout
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ 
+              duration: 0.4, 
+              delay: index * 0.03,
+              ease: [0.23, 1, 0.32, 1] 
+            }}
+          >
+            <AnimeCard anime={item} onClick={() => handleLinkClick(item.id, item.link)} />
+          </motion.div>
+        ))}
+      </AnimatePresence>
       
       {filteredItems.length === 0 && (
         <div className="col-span-full py-20 text-center text-white/30">
