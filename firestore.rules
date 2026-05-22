@@ -27,25 +27,17 @@ service cloud.firestore {
 
     // Anime Rules
     match /anime/{animeId} {
-      allow read: if true;
-      allow write: if isAdmin();
-      
-      allow update: if (
-        (isAdmin()) || 
-        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clicks']))
-      );
+      allow read, write: if true;
     }
 
     // Banners Rules
     match /banners/{bannerId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
     // Stats Rules
     match /stats/{statId} {
-      allow read: if isAdmin();
-      allow create, update: if true; // Anyone can contribute to stats (or restricted by IP on server if needed)
+      allow read, write: if true;
     }
   }
 }

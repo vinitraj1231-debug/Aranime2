@@ -9,6 +9,9 @@
         "thumbnail": { "type": "string", "description": "URL of the thumbnail image" },
         "link": { "type": "string", "description": "URL to redirect to when clicked" },
         "category": { "type": "string", "description": "Genre/Category of the anime" },
+        "keywords": { "type": "string", "description": "Comma-separated keywords or alternative titles for advanced search queries" },
+        "rating": { "type": "number", "description": "User rating score out of 10" },
+        "isFeatured": { "type": "boolean", "description": "Controls if the anime appears in the top horizontal sliding featured list" },
         "clicks": { "type": "number", "description": "Counter for clicks" },
         "createdAt": { "type": "string", "format": "date-time" },
         "isActive": { "type": "boolean" }

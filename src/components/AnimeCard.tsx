@@ -6,6 +6,7 @@ interface AnimeCardProps {
     thumbnail: string;
     clicks: number;
     category?: string;
+    rating?: number;
   };
   onClick: () => void;
 }
@@ -41,6 +42,14 @@ export default function AnimeCard({ anime, onClick }: AnimeCardProps) {
         {anime.category && (
           <div className="absolute top-2 left-2 px-2.5 py-1 bg-brand/90 backdrop-blur-sm rounded-md text-[9px] font-black text-white uppercase tracking-tighter shadow-lg border border-white/20">
             {anime.category}
+          </div>
+        )}
+
+        {/* Rating Badge */}
+        {anime.rating !== undefined && anime.rating > 0 && (
+          <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/80 backdrop-blur-sm rounded-md text-[9px] font-black text-brand uppercase tracking-wider shadow-lg border border-white/10 flex items-center gap-1.5">
+            <span className="text-yellow-400">★</span>
+            <span className="text-white">{Number(anime.rating).toFixed(1)}</span>
           </div>
         )}
       </div>

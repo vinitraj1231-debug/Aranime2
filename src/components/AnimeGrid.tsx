@@ -11,6 +11,9 @@ interface Anime {
   thumbnail: string;
   link: string;
   category?: string;
+  keywords?: string;
+  rating?: number;
+  isFeatured?: boolean;
   clicks: number;
 }
 
@@ -27,7 +30,8 @@ export default function AnimeGrid({ search = "", category = "All" }: { search?: 
   }, []);
 
   const filteredItems = items.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase()) ||
+      (item.keywords && item.keywords.toLowerCase().includes(search.toLowerCase()));
     const matchesCategory = category === "All" || item.category === category;
     return matchesSearch && matchesCategory;
   });

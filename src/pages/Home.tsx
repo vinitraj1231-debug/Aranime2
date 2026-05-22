@@ -1,21 +1,131 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, increment } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { motion } from "motion/react";
 import BannerCarousel from "../components/BannerCarousel";
 import AnimeGrid from "../components/AnimeGrid";
-import { TrendingUp, Search } from "lucide-react";
+import { Search, Star, Play, Eye, Sparkles } from "lucide-react";
+
+interface Anime {
+  id: string;
+  title: string;
+  thumbnail: string;
+  link: string;
+  category?: string;
+  rating?: number;
+  isFeatured?: boolean;
+  clicks: number;
+}
 
 export default function Home() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [featuredAnime, setFeaturedAnime] = useState<Anime[]>([]);
 
   const categories = ["All", "Action", "Comedy", "Drama", "Fantasy", "Romance", "Sci-Fi", "Slice of Life", "Adventure", "Supernatural"];
 
+  useEffect(() => {
+    const q = query(collection(db, "anime"), orderBy("createdAt", "desc"));
+    return onSnapshot(q, (snapshot) => {
+      const all: Anime[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Anime));
+      // Filter out specifically the ones marked as isFeatured
+      setFeaturedAnime(all.filter(item => item.isFeatured === true));
+    });
+  }, []);
+
+  const handleLinkClick = async (id: string, link: string) => {
+    try {
+      await updateDoc(doc(db, "anime", id), {
+        clicks: increment(1)
+      });
+      window.open(link, '_blank');
+    } catch (e) {
+      console.error(e);
+      window.open(link, '_blank');
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 pb-12">
+      {/* Top Banner Promos */}
       <BannerCarousel />
       
       <div className="max-w-7xl mx-auto w-full px-4 space-y-10">
+
+        {/* Dynamic Horizontal Scroll Spotlight Section (Admin Controlled) */}
+        {featuredAnime.length > 0 && (
+          <div id="featured-scroll-section" className="space-y-4 pt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-brand animate-pulse" />
+                <h2 className="text-xl font-bold uppercase tracking-tight italic text-white">
+                  Featured Spotlights
+                </h2>
+                <span className="text-[9px] bg-brand/10 text-brand px-2 py-0.5 rounded font-black uppercase tracking-wider font-mono">Spotlight row active</span>
+              </div>
+            </div>
+
+            {/* Horizontal Scroll Containers */}
+            <div 
+              id="featured-row-container" 
+              className="flex gap-4 overflow-x-auto pb-4 pt-1 snap-x no-scrollbar custom-scrollbar scroll-smooth"
+            >
+              {featuredAnime.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => handleLinkClick(item.id, item.link)}
+                  className="w-48 sm:w-56 shrink-0 snap-start group relative aspect-[2/3] bg-bg-dark rounded-2xl overflow-hidden border border-white/5 hover:border-brand/50 shadow-xl transition-all duration-300 cursor-pointer focus:outline-none"
+                >
+                  <img
+                    src={item.thumbnail}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  
+                  {/* Glass Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-95 flex flex-col justify-end p-4" />
+
+                  {/* Rating Badge */}
+                  {item.rating && (
+                    <div className="absolute top-3 left-3 px-2 py-0.5 bg-black/85 backdrop-blur-md rounded-lg text-[9px] font-black text-brand uppercase tracking-wider border border-white/5 flex items-center gap-1">
+                      <span className="text-yellow-400">★</span>
+                      <span className="text-white font-bold">{Number(item.rating).toFixed(1)}</span>
+                    </div>
+                  )}
+
+                  {/* View counter */}
+                  <div className="absolute top-3 right-3 px-2 py-0.5 bg-black/85 backdrop-blur-md rounded-lg text-[8px] font-black text-white/70 border border-white/5 uppercase tracking-wide flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 bg-brand rounded-full animate-pulse" />
+                    <span>{item.clicks.toLocaleString()} VIEWS</span>
+                  </div>
+
+                  {/* Play Action button display on hover */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="w-10 h-10 bg-brand rounded-full flex items-center justify-center shadow-lg transform translate-y-3 group-hover:translate-y-0 transition-transform">
+                      <Play className="text-white fill-current w-5 h-5 ml-0.5" />
+                    </div>
+                  </div>
+
+                  {/* Title and details bottom text */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 shrink-0 pointer-events-none">
+                    {item.category && (
+                      <span className="text-[8px] font-black tracking-widest text-brand uppercase mb-1 block">
+                        {item.category}
+                      </span>
+                    )}
+                    <h3 className="font-extrabold text-[12px] sm:text-[13px] text-white line-clamp-2 leading-tight tracking-tight group-hover:text-brand transition-colors">
+                      {item.title}
+                    </h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Modern Categories Bar */}
-        <div className="relative">
+        <div className="relative pt-4">
           <div className="flex items-center gap-3 overflow-x-auto pb-4 custom-scrollbar scroll-smooth no-scrollbar">
             {categories.map(cat => (
               <button
@@ -59,6 +169,7 @@ export default function Home() {
           </div>
         </div>
         
+        {/* Main Grid Component */}
         <AnimeGrid search={search} category={selectedCategory} />
       </div>
 

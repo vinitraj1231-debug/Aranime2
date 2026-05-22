@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { User, signOut } from "firebase/auth";
-import { auth } from "../lib/firebase";
-import { LogOut, Settings, User as UserIcon } from "lucide-react";
+import { User } from "firebase/auth";
+import { Menu, X, ShieldAlert, FileText, Lock, ChevronRight, Scale, Info } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 
 interface NavbarProps {
   user: User | null;
@@ -9,53 +10,200 @@ interface NavbarProps {
 }
 
 export default function Navbar({ user, isAdmin }: NavbarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<'none' | 'terms' | 'privacy'>('none');
+
   return (
-    <nav className="bg-bg-dark border-b border-white/5 sticky top-0 z-50 px-4 py-3">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-1 group">
-          <div className="bg-brand px-2.5 py-1.5 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-            <span className="text-white font-black italic text-xl leading-none">AR</span>
-          </div>
-          <span className="text-2xl font-black bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent uppercase tracking-tighter italic ml-0.5">
-            ANIME
-          </span>
-        </Link>
-
-        <div className="flex items-center gap-4">
-          {isAdmin && (
-            <Link 
-              to="/admin" 
-              className="p-2 hover:bg-white/5 rounded-full transition-colors text-white/70 hover:text-white"
-              title="Admin Panel"
-            >
-              <Settings className="w-5 h-5" />
-            </Link>
-          )}
-
-          {user ? (
-            <div className="flex items-center gap-3 pl-4 border-l border-white/10">
-              <div className="flex flex-col items-end hidden xs:flex">
-                <span className="text-xs font-medium text-white line-clamp-1">{user.displayName || "User"}</span>
-                <span className="text-[10px] text-white/40">VIP Member</span>
-              </div>
-              <button 
-                onClick={() => signOut(auth)}
-                className="p-2 hover:bg-red-500/10 rounded-full transition-colors text-white/70 hover:text-red-500"
-                title="Sign Out"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
+    <>
+      <nav className="bg-bg-dark border-b border-white/5 sticky top-0 z-50 px-4 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Link id="nav-logo" to="/" className="flex items-center gap-1 group">
+            <div className="bg-brand px-2.5 py-1.5 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+              <span className="text-white font-black italic text-xl leading-none">AR</span>
             </div>
-          ) : (
-            <Link 
-              to="/login"
-              className="bg-brand hover:bg-brand-dark transition-colors px-6 py-2 rounded-full font-semibold text-sm"
-            >
-              Login
-            </Link>
-          )}
+            <span className="text-2xl font-black bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent uppercase tracking-tighter italic ml-0.5">
+              ANIME
+            </span>
+          </Link>
+
+          {/* 3-line Hamburger Menu representation */}
+          <button
+            id="nav-hamburger-btn"
+            onClick={() => setIsOpen(true)}
+            className="group flex flex-col gap-1 px-3 py-3 hover:bg-white/5 rounded-xl transition-all brightness-110 active:scale-95"
+            title="Menu"
+          >
+            <div className="w-5 h-[2px] bg-brand group-hover:translate-x-0.5 transition-transform" />
+            <div className="w-4 h-[2px] bg-white group-hover:w-5 transition-all" />
+            <div className="w-5 h-[2px] bg-brand group-hover:-translate-x-0.5 transition-transform" />
+          </button>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Slide-out Drawer Side Panel */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop Overlay */}
+            <motion.div
+              id="drawer-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => { setIsOpen(false); setActiveSection('none'); }}
+              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md"
+            />
+
+            {/* Sidebar drawer content */}
+            <motion.div
+              id="drawer-container"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-bg-dark border-l border-white/10 z-[100] shadow-2xl p-6 md:p-8 flex flex-col overflow-y-auto custom-scrollbar text-white"
+            >
+              <div className="flex items-center justify-between pb-6 border-b border-white/5 mb-6">
+                <div>
+                  <h3 className="text-lg font-black tracking-tighter italic">
+                    AR<span className="text-brand">ANIME</span> MENU
+                  </h3>
+                  <p className="text-[9px] text-white/30 uppercase tracking-widest font-mono">Platform Portal v2.0</p>
+                </div>
+                <button
+                  id="drawer-close-btn"
+                  onClick={() => { setIsOpen(false); setActiveSection('none'); }}
+                  className="p-2 hover:bg-white/5 rounded-xl text-white/50 hover:text-white transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Drawer Links and Content */}
+              <div className="flex-1 space-y-6">
+                
+                {/* Brand description or badge */}
+                <div className="bg-bg-darker border border-white/5 p-4 rounded-2xl flex items-start gap-3">
+                  <div className="w-10 h-10 bg-brand/10 border border-brand/20 rounded-xl flex items-center justify-center shrink-0">
+                    <Scale className="text-brand w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-white">Age Verification Standard</h4>
+                    <p className="text-[11px] text-white/40 mt-1 leading-snug">
+                      Access is reserved strictly for users 18 years of age or older. We maintain catalog indexes pointing to secure global channels.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 px-2">Navigation Check</span>
+                  
+                  <Link
+                    id="drawer-home-link"
+                    to="/"
+                    onClick={() => setIsOpen(false)}
+                    className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all font-bold text-sm text-left shadow-sm group"
+                  >
+                    <span>Browse Anime Index</span>
+                    <ChevronRight className="w-4 h-4 text-white/30 group-hover:translate-x-1 group-hover:text-brand transition-all" />
+                  </Link>
+
+                  <Link
+                    id="drawer-admin-link"
+                    to="/admin"
+                    onClick={() => setIsOpen(false)}
+                    className="w-full flex items-center justify-between p-3.5 bg-brand/10 hover:bg-brand/20 border border-brand/20 rounded-2xl transition-all font-bold text-sm text-left text-brand group"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Lock className="w-4 h-4" /> Admin Console Gate
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-brand group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 px-2">Disclaimers &amp; Information</span>
+
+                  {/* Accordion 1: Terms & Conditions */}
+                  <div className="border border-white/5 rounded-2xl overflow-hidden bg-bg-darker">
+                    <button
+                      id="drawer-terms-btn"
+                      onClick={() => setActiveSection(activeSection === 'terms' ? 'none' : 'terms')}
+                      className="w-full p-4 flex items-center justify-between text-left focus:outline-none"
+                    >
+                      <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2.5">
+                        <FileText className="w-4 h-4 text-white/40" /> Terms of Service
+                      </span>
+                      <ChevronRight className={`w-4 h-4 text-white/30 transition-transform duration-300 ${activeSection === 'terms' ? 'rotate-90 text-brand' : ''}`} />
+                    </button>
+                    <AnimatePresence>
+                      {activeSection === 'terms' && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="px-4 pb-4 overflow-hidden border-t border-white/5"
+                        >
+                          <div className="pt-3 text-[11px] text-white/40 space-y-2 leading-relaxed text-left max-h-48 overflow-y-auto custom-scrollbar pr-1 select-none">
+                            <p className="font-bold text-white">General Compliance:</p>
+                            <p>You confirm you are at least 18 years old or possess legal majority status in your jurisdiction.</p>
+                            <p className="font-bold text-white">External Catalog Redir:</p>
+                            <p>All items provided as links point out to external, self-hosted distribution folders. AR ANIME does not host any media files directly in its app container.</p>
+                            <p className="font-bold text-white">Updates:</p>
+                            <p>Catalog listings receive periodic live index patches by authorized administrators using a secure master gateway key.</p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Accordion 2: Privacy Policy */}
+                  <div className="border border-white/5 rounded-2xl overflow-hidden bg-bg-darker">
+                    <button
+                      id="drawer-privacy-btn"
+                      onClick={() => setActiveSection(activeSection === 'privacy' ? 'none' : 'privacy')}
+                      className="w-full p-4 flex items-center justify-between text-left focus:outline-none"
+                    >
+                      <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2.5">
+                        <ShieldAlert className="w-4 h-4 text-white/40" /> Privacy Policy
+                      </span>
+                      <ChevronRight className={`w-4 h-4 text-white/30 transition-transform duration-300 ${activeSection === 'privacy' ? 'rotate-90 text-brand' : ''}`} />
+                    </button>
+                    <AnimatePresence>
+                      {activeSection === 'privacy' && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="px-4 pb-4 overflow-hidden border-t border-white/5"
+                        >
+                          <div className="pt-3 text-[11px] text-white/40 space-y-2 leading-relaxed text-left max-h-48 overflow-y-auto custom-scrollbar pr-1 select-none">
+                            <p className="font-bold text-white">Telemetry &amp; Logs:</p>
+                            <p>We respect individual safety. Tracking is completely limited to numerical aggregate event ticks (clicks register as statistical values next to corresponding series cards).</p>
+                            <p className="font-bold text-white">User Data:</p>
+                            <p>We store zero account information, email rosters, search inputs, or navigation trails. Your preferences reside in regional local storage securely.</p>
+                            <p className="font-bold text-white">Local Storage:</p>
+                            <p>We use localized items exclusively to track age verification consents and display states.</p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* Menu Footer */}
+              <div className="pt-6 border-t border-white/5 mt-auto text-center space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/30">AR ANIME NETWORK</p>
+                <p className="text-[9px] text-white/15 font-mono">RELEASE GROUP DISTRIBUTION PORTAL</p>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
+
