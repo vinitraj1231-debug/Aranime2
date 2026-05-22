@@ -166,10 +166,10 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <Link id="nav-logo" to="/" className="flex items-center gap-1 group shrink-0">
             <div className="bg-brand px-2.5 py-1.5 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-              <span className="text-white font-black italic text-xl leading-none">AR</span>
+              <span className="text-white font-black italic text-xl leading-none">B</span>
             </div>
             <span className="text-2xl font-black bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent uppercase tracking-tighter italic ml-0.5">
-              ANIME
+              BLAZE
             </span>
           </Link>
 
