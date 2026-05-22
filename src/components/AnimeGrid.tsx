@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, increment } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, increment, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { motion, AnimatePresence } from "motion/react";
 import AnimeCard from "./AnimeCard";
@@ -17,7 +17,7 @@ interface Anime {
   clicks: number;
 }
 
-export default function AnimeGrid({ search = "", category = "All" }: { search?: string, category?: string }) {
+export default function AnimeGrid({ search = "", category = "All", sortBy = "latest" }: { search?: string, category?: string, sortBy?: "latest" | "trending" }) {
   const [items, setItems] = useState<Anime[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,14 +36,31 @@ export default function AnimeGrid({ search = "", category = "All" }: { search?: 
     return matchesSearch && matchesCategory;
   });
 
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    if (sortBy === "trending") {
+      return (b.clicks || 0) - (a.clicks || 0);
+    }
+    return 0; // retain natural firestore order (newest created first)
+  });
+
   const handleLinkClick = async (id: string, link: string) => {
     try {
-      await updateDoc(doc(db, "anime", id), {
-        clicks: increment(1)
-      });
-      window.open(link, '_blank');
+      const animeDocRef = doc(db, "anime", id);
+      const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const statDocRef = doc(db, "stats", todayStr);
+
+      await Promise.all([
+        updateDoc(animeDocRef, {
+          clicks: increment(1)
+        }),
+        setDoc(statDocRef, {
+          date: todayStr,
+          totalClicks: increment(1)
+        }, { merge: true })
+      ]);
     } catch (e) {
-      console.error(e);
+      console.error("Click logging error:", e);
+    } finally {
       window.open(link, '_blank');
     }
   };
@@ -59,7 +76,7 @@ export default function AnimeGrid({ search = "", category = "All" }: { search?: 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-8 gap-x-4 p-4">
       <AnimatePresence mode="popLayout">
-        {filteredItems.map((item, index) => (
+        {sortedItems.map((item, index) => (
           <motion.div
             key={item.id}
             layout
@@ -77,7 +94,7 @@ export default function AnimeGrid({ search = "", category = "All" }: { search?: 
         ))}
       </AnimatePresence>
       
-      {filteredItems.length === 0 && (
+      {sortedItems.length === 0 && (
         <div className="col-span-full py-20 text-center text-white/30">
           <p className="text-lg">No anime found{search ? ` for "${search}"` : ""}.</p>
           <p className="text-sm">Try a different search term or come back later!</p>

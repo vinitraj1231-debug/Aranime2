@@ -4,7 +4,7 @@ import { db } from "../lib/firebase";
 import { motion } from "motion/react";
 import BannerCarousel from "../components/BannerCarousel";
 import AnimeGrid from "../components/AnimeGrid";
-import { Search, Star, Play, Eye, Sparkles } from "lucide-react";
+import { Search, Star, Play, Eye, Sparkles, Clock, Flame } from "lucide-react";
 
 interface Anime {
   id: string;
@@ -17,9 +17,14 @@ interface Anime {
   clicks: number;
 }
 
-export default function Home() {
-  const [search, setSearch] = useState("");
+interface HomeProps {
+  search?: string;
+  setSearch?: (val: string) => void;
+}
+
+export default function Home({ search = "", setSearch }: HomeProps) {
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortBy, setSortBy] = useState<'latest' | 'trending'>('latest');
   const [featuredAnime, setFeaturedAnime] = useState<Anime[]>([]);
 
   const categories = ["All", "Action", "Comedy", "Drama", "Fantasy", "Romance", "Sci-Fi", "Slice of Life", "Adventure", "Supernatural"];
@@ -145,7 +150,7 @@ export default function Home() {
           <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-bg-darker to-transparent pointer-events-none" />
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 py-2">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-2">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-8 bg-brand rounded-full shadow-[0_0_15px_rgba(244,117,33,0.5)]" />
@@ -156,21 +161,39 @@ export default function Home() {
             <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.2em] ml-5">Exploration / Database / v2.0</p>
           </div>
 
-          <div className="relative group max-w-sm w-full">
-            <div className="absolute -inset-1 bg-brand/20 rounded-full blur opacity-0 group-focus-within:opacity-100 transition-opacity" />
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-brand transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Search index..." 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="relative w-full bg-bg-dark/80 backdrop-blur-xl border border-white/5 focus:border-brand/50 outline-none rounded-full py-3.5 pl-11 pr-5 text-sm transition-all shadow-inner placeholder:text-white/10"
-            />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 md:w-auto shrink-0 self-end">
+            {/* Sorting Toggle */}
+            <div className="flex bg-bg-dark/80 backdrop-blur-xl border border-white/5 rounded-full p-1 shadow-inner shrink-0 leading-none">
+              <button
+                id="sort-btn-latest"
+                onClick={() => setSortBy("latest")}
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                  sortBy === "latest"
+                  ? "bg-white/10 text-white shadow-sm border border-white/5"
+                  : "text-white/35 hover:text-white"
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5 text-brand" />
+                <span>Latest</span>
+              </button>
+              <button
+                id="sort-btn-trending"
+                onClick={() => setSortBy("trending")}
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                  sortBy === "trending"
+                  ? "bg-brand text-white shadow-lg shadow-brand/25 border border-brand/10"
+                  : "text-white/35 hover:text-white"
+                }`}
+              >
+                <Flame className="w-3.5 h-3.5" />
+                <span>Trending</span>
+              </button>
+            </div>
           </div>
         </div>
         
         {/* Main Grid Component */}
-        <AnimeGrid search={search} category={selectedCategory} />
+        <AnimeGrid search={search} category={selectedCategory} sortBy={sortBy} />
       </div>
 
       {/* Footer Info / SEO Stuff */}

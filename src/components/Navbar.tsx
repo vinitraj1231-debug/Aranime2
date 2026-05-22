@@ -1,23 +1,36 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { User } from "firebase/auth";
-import { Menu, X, ShieldAlert, FileText, Lock, ChevronRight, Scale, Info } from "lucide-react";
+import { Menu, X, ShieldAlert, FileText, Lock, ChevronRight, Scale, Info, Search } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 interface NavbarProps {
   user: User | null;
   isAdmin: boolean;
+  search?: string;
+  setSearch?: (val: string) => void;
 }
 
-export default function Navbar({ user, isAdmin }: NavbarProps) {
+export default function Navbar({ user, isAdmin, search = "", setSearch }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<'none' | 'terms' | 'privacy'>('none');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSearchChange = (val: string) => {
+    if (setSearch) {
+      setSearch(val);
+      if (location.pathname !== "/") {
+        navigate("/");
+      }
+    }
+  };
 
   return (
     <>
       <nav className="bg-bg-dark border-b border-white/5 sticky top-0 z-50 px-4 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link id="nav-logo" to="/" className="flex items-center gap-1 group">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <Link id="nav-logo" to="/" className="flex items-center gap-1 group shrink-0">
             <div className="bg-brand px-2.5 py-1.5 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
               <span className="text-white font-black italic text-xl leading-none">AR</span>
             </div>
@@ -26,11 +39,25 @@ export default function Navbar({ user, isAdmin }: NavbarProps) {
             </span>
           </Link>
 
+          {/* Header Search Bar */}
+          <div className="relative group max-w-[200px] xs:max-w-[280px] sm:max-w-xs md:max-w-sm w-full mx-auto px-1 sm:px-4">
+            <div className="absolute -inset-0.5 bg-brand/15 rounded-full blur opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
+            <Search className="absolute left-4 sm:left-7 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30 group-focus-within:text-brand transition-colors" />
+            <input 
+              id="header-search-bar"
+              type="text" 
+              placeholder="Search index..." 
+              value={search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="relative w-full bg-black/40 backdrop-blur-md border border-white/5 focus:border-brand/40 outline-none rounded-full py-2 pl-9 sm:pl-11 pr-4 text-xs transition-all placeholder:text-white/20 text-white shadow-inner"
+            />
+          </div>
+
           {/* 3-line Hamburger Menu representation */}
           <button
             id="nav-hamburger-btn"
             onClick={() => setIsOpen(true)}
-            className="group flex flex-col gap-1 px-3 py-3 hover:bg-white/5 rounded-xl transition-all brightness-110 active:scale-95"
+            className="group flex flex-col gap-1 px-3 py-3 hover:bg-white/5 rounded-xl transition-all brightness-110 active:scale-95 shrink-0"
             title="Menu"
           >
             <div className="w-5 h-[2px] bg-brand group-hover:translate-x-0.5 transition-transform" />
