@@ -119,7 +119,7 @@ export default function Admin() {
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
       
-      const correctHash = "6c655543c5912cb7c7e54063dd9f12ccdf7316d9bb08bd8e0763976c72982bcb"; // SHA-256 of "28@RajPapa"
+      const correctHash = "6c655543c5912cb7c7e54063dd9f12ccdf7316d9bb08bd8e0763976c72982bcb"; // SHA-256 of terimaiyachodo
 
       if (hashHex === correctHash) {
         setIsAuthenticated(true);
@@ -300,7 +300,7 @@ export default function Admin() {
           </div>
 
           <h2 className="text-center text-3xl font-black uppercase tracking-tighter text-white italic">
-            AR<span className="text-brand">ANIME</span> GATEWAY
+            B<span className="text-brand">BLAZE</span> GATEWAY
           </h2>
           <p className="text-center text-[10px] text-white/40 uppercase tracking-[0.25em] font-mono mt-1 mb-8">
             ADMINISTRATIVE ENTRANCE ONLY
@@ -364,7 +364,7 @@ export default function Admin() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10">
         <div>
           <h1 className="text-4xl font-black uppercase tracking-tighter flex items-center gap-3 italic">
-            AR<span className="text-brand">ANIME</span> <span className="text-sm not-italic font-mono uppercase bg-brand/10 text-brand px-2.5 py-1 rounded">Panel</span>
+            B<span className="text-brand">BLAZE</span> <span className="text-sm not-italic font-mono uppercase bg-brand/10 text-brand px-2.5 py-1 rounded">Panel</span>
           </h1>
           <p className="text-white/40 text-[10px] mt-1 font-mono uppercase tracking-widest">Connected with Local Keys | Master Gate bypass</p>
         </div>
