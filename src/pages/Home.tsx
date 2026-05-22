@@ -103,7 +103,7 @@ export default function Home({ search = "", setSearch }: HomeProps) {
                 <div
                   key={item.id}
                   onClick={() => handleLinkClick(item)}
-                  className="w-72 sm:w-80 shrink-0 snap-start group relative aspect-[16/10] bg-bg-dark rounded-[2.5rem] overflow-hidden border border-white/[0.08] hover:border-brand/50 shadow-2xl transition-all duration-700 ease-out cursor-pointer focus:outline-none"
+                  className="w-56 sm:w-64 shrink-0 snap-start group relative aspect-[16/10] bg-bg-dark rounded-[1.8rem] overflow-hidden border border-white/[0.08] hover:border-brand/50 shadow-2xl transition-all duration-700 ease-out cursor-pointer focus:outline-none"
                 >
                   <img
                     src={item.thumbnail}
@@ -137,11 +137,11 @@ export default function Home({ search = "", setSearch }: HomeProps) {
                   {/* Title and details bottom text */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 shrink-0 pointer-events-none">
                     {item.category && (
-                      <span className="text-[8px] font-black tracking-[0.25em] text-brand uppercase mb-1 block">
+                      <span className="text-[7px] font-black tracking-[0.25em] text-brand uppercase mb-1 block">
                         {item.category}
                       </span>
                     )}
-                    <h3 className="font-black text-[12px] sm:text-[14px] text-white leading-tight tracking-tight group-hover:text-brand transition-colors uppercase italic line-clamp-1">
+                    <h3 className="font-black text-[11px] sm:text-[13px] text-white leading-tight tracking-tight group-hover:text-brand transition-colors uppercase italic line-clamp-1">
                       {item.title}
                     </h3>
                   </div>
@@ -158,7 +158,7 @@ export default function Home({ search = "", setSearch }: HomeProps) {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-8 py-3 rounded-full text-[12px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all border-2 shadow-lg ${
+                className={`px-7 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all border-2 shadow-lg ${
                   selectedCategory === cat 
                   ? 'bg-brand border-brand text-white shadow-brand/40 scale-110'
                   : 'bg-bg-dark/60 backdrop-blur-xl border-white/5 text-white/40 hover:text-white hover:bg-white/10 hover:border-white/10'
@@ -175,12 +175,12 @@ export default function Home({ search = "", setSearch }: HomeProps) {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4">
           <div className="space-y-2">
             <div className="flex items-center gap-4">
-              <div className="w-2 h-10 bg-brand rounded-full shadow-[0_0_25px_rgba(244,117,33,0.7)] animate-pulse" />
-              <h2 className="text-4xl font-black uppercase tracking-tighter italic text-white leading-none">
+              <div className="w-1.5 h-8 bg-brand rounded-full shadow-[0_0_25px_rgba(244,117,33,0.7)] animate-pulse" />
+              <h2 className="text-3xl font-black uppercase tracking-tighter italic text-white leading-none">
                 {selectedCategory === "All" ? "Premium Video" : `${selectedCategory} Collection`}
               </h2>
             </div>
-            <p className="text-[10px] text-white/20 uppercase tracking-[0.4em] font-bold ml-6">High Definition Digital Streaming</p>
+            <p className="text-[9px] text-white/20 uppercase tracking-[0.4em] font-bold ml-6">High Definition Digital Streaming</p>
           </div>
         </div>
         
@@ -195,7 +195,7 @@ export default function Home({ search = "", setSearch }: HomeProps) {
            <div className="h-0.5 w-12 bg-white" />
            <div className="h-0.5 w-12 bg-brand" />
         </div>
-        <p className="text-[10px] font-black uppercase tracking-[0.4em] mb-2 text-white/30"> B BLAZE NETWORK | AUTHORIZED ACCESS ONLY</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.4em] mb-2 text-white/30"> BLAZE NETWORK | AUTHORIZED ACCESS ONLY</p>
         <p className="text-[9px] text-white/10 font-mono">ENCRYPTED TELEGRAM MINI APP DISTRIBUTION ENGINE</p>
       </div>
     </div>

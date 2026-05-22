@@ -75,12 +75,12 @@ export default function AnimeCard({ anime, onClick }: AnimeCardProps) {
       </div>
       
       <div className="px-2 space-y-2">
-        <h3 className="font-black text-base sm:text-lg leading-snug group-hover:text-brand transition-colors text-white tracking-tight line-clamp-2 uppercase italic">
+        <h3 className="font-black text-sm sm:text-base leading-snug group-hover:text-brand transition-colors text-white tracking-tight line-clamp-2 uppercase italic">
           {anime.title}
         </h3>
         <div className="flex items-center gap-3">
            <div className="h-1 w-8 bg-brand rounded-full shadow-[0_0_10px_rgba(244,117,33,0.5)] group-hover:w-16 transition-all duration-500" />
-           <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.25em] group-hover:text-white/60 transition-colors">B BLAZE PREMIUM</span>
+           <span className="text-[9px] text-white/40 font-black uppercase tracking-[0.25em] group-hover:text-white/60 transition-colors">BLAZE PREMIUM</span>
         </div>
       </div>
     </button>
