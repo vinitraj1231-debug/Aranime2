@@ -171,9 +171,9 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
           </Link>
 
           {/* Header Search Bar */}
-          <div className="relative group max-w-[140px] xs:max-w-[180px] sm:max-w-xs md:max-w-sm w-full mr-auto ml-12 px-1 sm:px-2">
+          <div className="relative group max-w-[180px] xs:max-w-[220px] sm:max-w-sm md:max-w-md w-full mr-auto ml-8 px-1 sm:px-2">
             <div className="absolute -inset-0.5 bg-brand/15 rounded-full blur opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
-            <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 w-3 h-3 text-white/30 group-focus-within:text-brand transition-colors" />
+            <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30 group-focus-within:text-brand transition-colors z-10" />
             <input 
               id="header-search-bar"
               type="text" 
@@ -187,7 +187,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
                   saveSearchQuery(search);
                 }
               }}
-              className="relative w-full bg-black/40 backdrop-blur-md border border-white/5 focus:border-brand/40 outline-none rounded-full py-1.5 pl-8 sm:pl-10 pr-4 text-[9px] sm:text-[10px] text-center transition-all placeholder:text-white/20 text-white shadow-inner font-bold tracking-wide"
+              className="relative w-full bg-black/40 backdrop-blur-md border border-white/5 focus:border-brand/40 outline-none rounded-full py-2.5 px-10 text-[11px] sm:text-[13px] text-center transition-all placeholder:text-white/20 text-white shadow-inner font-bold tracking-wide"
             />
 
             {/* Recent Searches Dropdown Panel */}

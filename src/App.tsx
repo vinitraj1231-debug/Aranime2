@@ -109,7 +109,7 @@ function AppContent() {
             </div>
 
             <h2 className="text-3xl font-black uppercase tracking-tight italic mb-3">
-              B <span className="text-brand">BLAZE</span> CALIBRATION
+              <span className="text-brand">BLAZE</span> CALIBRATION
             </h2>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-[10px] font-black text-red-400 uppercase tracking-widest mb-6">
               <ShieldAlert strokeWidth={1.2} className="w-3.5 h-3.5" />
@@ -136,7 +136,7 @@ function AppContent() {
           </motion.div>
 
           <footer className="mt-12 text-center opacity-25 z-10">
-            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/50">B BLAZE SERVICE NET | SECURED CONTAINER</p>
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/50">BLAZE SERVICE NET | SECURED CONTAINER</p>
           </footer>
         </div>
       </>
