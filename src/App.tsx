@@ -109,7 +109,7 @@ function AppContent() {
             </div>
 
             <h2 className="text-3xl font-black uppercase tracking-tight italic mb-3">
-              AR<span className="text-brand">ANIME</span> CALIBRATION
+              B<span className="text-brand">BLAZE</span> CALIBRATION
             </h2>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-[10px] font-black text-red-400 uppercase tracking-widest mb-6">
               <ShieldAlert strokeWidth={1.2} className="w-3.5 h-3.5" />
