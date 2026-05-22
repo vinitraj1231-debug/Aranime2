@@ -49,14 +49,14 @@ export default function AgeGate() {
             </div>
 
             <h2 className="text-center text-3xl font-black uppercase tracking-tighter text-white italic">
-              AR<span className="text-brand">ANIME</span> VERIFICATION
+              B<span className="text-brand">BLAZE</span> VERIFICATION
             </h2>
             <p className="text-center text-[10px] uppercase tracking-[0.25em] text-white/40 mt-1 mb-6 font-bold">
               Age Gate / Terms &amp; Conditions
             </p>
 
             <div className="bg-bg-darker border border-white/5 rounded-2xl p-5 mb-8 h-40 overflow-y-auto text-xs text-white/50 space-y-4 leading-relaxed custom-scrollbar text-left select-none">
-              <p className="font-bold text-white text-sm">Welcome to AR ANIME Network.</p>
+              <p className="font-bold text-white text-sm">Welcome to BLAZE Network.</p>
               <p>
                 By accessing this platform, you affirm under penalty of perjury that you are at least 18 years of age (or the age of majority in your jurisdiction, whichever is older).
               </p>
