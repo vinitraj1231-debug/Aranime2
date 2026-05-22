@@ -50,6 +50,15 @@
         "addedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["email"]
+    },
+    "config": {
+      "title": "System Config",
+      "description": "System-wide configuration flags like maintenance mode.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "description": "Whether maintenance mode is active" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "When config was last altered" }
+      }
     }
   },
   "firestore": {
@@ -68,6 +77,10 @@
     "admins": {
       "schema": "admins",
       "description": "Authorized administrators."
+    },
+    "config": {
+      "schema": "config",
+      "description": "Global system configurations."
     }
   }
 }
