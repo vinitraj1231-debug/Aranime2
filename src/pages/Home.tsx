@@ -193,7 +193,7 @@ export default function Home({ search = "", setSearch }: HomeProps) {
            <div className="h-0.5 w-12 bg-white" />
            <div className="h-0.5 w-12 bg-brand" />
         </div>
-        <p className="text-[10px] font-black uppercase tracking-[0.4em] mb-2 text-white/30">AR ANIME NETWORK | AUTHORIZED ACCESS ONLY</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.4em] mb-2 text-white/30"> BLAZE NETWORK | AUTHORIZED ACCESS ONLY</p>
         <p className="text-[9px] text-white/10 font-mono">ENCRYPTED TELEGRAM MINI APP DISTRIBUTION ENGINE</p>
       </div>
     </div>
