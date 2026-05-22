@@ -49,5 +49,10 @@ service cloud.firestore {
     match /user_profiles/{profileId} {
       allow read, write: if true;
     }
+
+    // Connection Test Verification Rule
+    match /test/{docId} {
+      allow read: if true;
+    }
   }
 }
