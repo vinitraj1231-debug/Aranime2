@@ -5,6 +5,7 @@ import Admin from "./pages/Admin";
 import Navbar from "./components/Navbar";
 import AgeGate from "./components/AgeGate";
 import VideoPlayerModal from "./components/VideoPlayerModal";
+import TopProgressBar from "./components/TopProgressBar";
 import { doc, onSnapshot, updateDoc, increment, setDoc } from "firebase/firestore";
 import { db } from "./lib/firebase";
 import { motion, AnimatePresence } from "motion/react";
@@ -133,6 +134,9 @@ export default function App() {
     <BrowserRouter>
       {/* 18+ Age Gate overlay */}
       <AgeGate />
+      
+      {/* Dynamic top-of-page slim progress bar */}
+      <TopProgressBar />
       
       <div className="min-h-screen bg-bg-darker flex flex-col">
         <Navbar user={null} isAdmin={false} search={search} setSearch={setSearch} />

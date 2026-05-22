@@ -35,6 +35,15 @@ export default function Home({ search = "", setSearch }: HomeProps) {
   const categories = ["All", "Action", "Comedy", "Drama", "Fantasy", "Romance", "Sci-Fi", "Slice of Life", "Adventure", "Supernatural"];
 
   useEffect(() => {
+    // Refreshing lists triggered by state transitions gets simulated fast-progress bar integration
+    window.dispatchEvent(new CustomEvent("ar_progress_start"));
+    const dur = setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("ar_progress_end"));
+    }, 500);
+    return () => clearTimeout(dur);
+  }, [selectedCategory, search]);
+
+  useEffect(() => {
     const q = query(collection(db, "anime"), orderBy("createdAt", "desc"));
     return onSnapshot(q, (snapshot) => {
       const all: Anime[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Anime));

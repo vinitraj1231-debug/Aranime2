@@ -28,10 +28,16 @@ export default function AnimeGrid({ search = "", category = "All", sortBy = "lat
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    window.dispatchEvent(new CustomEvent("ar_progress_start"));
     const q = query(collection(db, "anime"), orderBy("createdAt", "desc"));
     return onSnapshot(q, (snapshot) => {
       setItems(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Anime)));
       setLoading(false);
+      window.dispatchEvent(new CustomEvent("ar_progress_end"));
+    }, (error) => {
+      console.error(error);
+      setLoading(false);
+      window.dispatchEvent(new CustomEvent("ar_progress_end"));
     });
   }, []);
 
