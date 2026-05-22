@@ -300,7 +300,7 @@ export default function Admin() {
           </div>
 
           <h2 className="text-center text-3xl font-black uppercase tracking-tighter text-white italic">
-            B <span className="text-brand">BLAZE</span> GATEWAY
+             <span className="text-brand">BLAZE</span> GATEWAY
           </h2>
           <p className="text-center text-[10px] text-white/40 uppercase tracking-[0.25em] font-mono mt-1 mb-8">
             ADMINISTRATIVE ENTRANCE ONLY
