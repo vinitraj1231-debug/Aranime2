@@ -17,7 +17,7 @@ export default function AnimeCard({ anime, onClick }: AnimeCardProps) {
       onClick={onClick}
       className="group relative flex flex-col gap-1.5 text-left w-full focus:outline-none"
     >
-      <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-bg-dark border border-white/5 shadow-md group-hover:border-brand/40 transition-all">
+      <div className="relative aspect-video rounded-xl overflow-hidden bg-bg-dark border border-white/5 shadow-md group-hover:border-brand/40 transition-all">
         <img 
           src={anime.thumbnail} 
           alt={anime.title}

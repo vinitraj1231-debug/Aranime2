@@ -253,23 +253,9 @@ export default function Admin() {
       const uDateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
       
       let clicks = 0;
-      let isSimulated = false;
 
       if (statsMap.has(dateStr)) {
         clicks = statsMap.get(dateStr) || 0;
-      } else {
-        // Generate realistic simulated clicks proportional to total views
-        const scale = Math.max(1, Math.round(totalViews / 15));
-        const dayOfWeek = d.getDay();
-        const dayOfMonth = d.getDate();
-        
-        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-        const weekendMultiplier = isWeekend ? 1.45 : 0.95;
-        
-        const wave = Math.sin(dayOfMonth * 0.4) * 4 + 12;
-        const baseClicks = Math.round((wave * weekendMultiplier) * (scale * 0.12 + 0.8));
-        clicks = Math.max(3, baseClicks);
-        isSimulated = true;
       }
 
       totalClicksSum += clicks;
@@ -282,7 +268,7 @@ export default function Admin() {
         date: dateStr,
         formattedDate: uDateStr,
         clicks: clicks,
-        simulated: isSimulated
+        simulated: false
       });
     }
 
@@ -568,18 +554,7 @@ export default function Admin() {
               </div>
             </div>
 
-            <div className="bg-bg-dark border border-white/5 p-6 rounded-[2.5rem] relative overflow-hidden">
-              <h3 className="text-lg font-bold uppercase italic tracking-tight mb-2">Live Status Terminal</h3>
-              <p className="text-xs text-white/40 leading-relaxed mb-4">
-                Operations bypass the standard Firebase Auth pop-ups completely. Rules allow instant local direct write parameters. 
-              </p>
-              <div className="bg-bg-darker rounded-xl p-4 font-mono text-[11px] text-white/60 space-y-1 select-none">
-                <p className="text-green-400">● NETWORK_ONLINE: DB initialized successfully.</p>
-                <p>● FIREBASE_DATABASE_ID: default</p>
-                <p>● BYPASS_DOMAIN_CHECK: ACTIVE (Vercel unlocked)</p>
-                <p>● CLIENT_SECURITY_STATE: DIRECT_BYPASS</p>
-              </div>
-            </div>
+
           </motion.div>
         )}
 
@@ -965,9 +940,6 @@ function CustomTooltip({ active, payload, label }: any) {
           <span className="w-2.5 h-2.5 rounded-full bg-brand animate-[pulse_2s_infinite]" />
           {payload[0].value} Direct Redirects
         </p>
-        {payload[0].payload.simulated && (
-          <p className="text-[9px] text-brand/60 font-medium font-mono mt-1">● Estimated organic baseline</p>
-        )}
       </div>
     );
   }
