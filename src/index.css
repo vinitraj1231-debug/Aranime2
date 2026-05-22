@@ -4,20 +4,10 @@
 @theme {
   --color-brand: #f47521;
   --color-brand-dark: #cc5b1a;
-  --color-bg-dark: var(--bg-dark);
-  --color-bg-darker: var(--bg-darker);
+  --color-bg-dark: #23252b;
+  --color-bg-darker: #141519;
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-}
-
-:root {
-  --bg-dark: #23252b;
-  --bg-darker: #141519;
-}
-
-:root[data-theme="midnight"] {
-  --bg-dark: #121826;
-  --bg-darker: #0a0d13;
 }
 
 @layer base {

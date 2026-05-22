@@ -62,7 +62,41 @@ export default function App() {
     }
   };
 
-  const isAdminPath = window.location.pathname === "/admin";
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
+  useEffect(() => {
+    let active = true;
+    const handlePathChange = () => {
+      setTimeout(() => {
+        if (active) {
+          setCurrentPath(window.location.pathname);
+        }
+      }, 0);
+    };
+    window.addEventListener("popstate", handlePathChange);
+    
+    const origPush = window.history.pushState;
+    const origReplace = window.history.replaceState;
+    
+    window.history.pushState = function (...args) {
+      origPush.apply(this, args);
+      handlePathChange();
+    };
+    window.history.replaceState = function (...args) {
+      origReplace.apply(this, args);
+      handlePathChange();
+    };
+
+    return () => {
+      active = false;
+      window.removeEventListener("popstate", handlePathChange);
+      window.history.pushState = origPush;
+      window.history.replaceState = origReplace;
+    };
+  }, []);
+
+  const normalizedPath = currentPath.toLowerCase().trim().replace(/\/$/, "");
+  const isAdminPath = normalizedPath === "/admin" || normalizedPath.startsWith("/admin");
 
   if (loading) {
     return (

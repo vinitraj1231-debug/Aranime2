@@ -27,6 +27,7 @@ export default function TopProgressBar() {
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
+    let timer: NodeJS.Timeout;
 
     if (isLoading) {
       setProgress(10);
@@ -42,19 +43,22 @@ export default function TopProgressBar() {
         });
       }, 120);
     } else {
-      if (progress > 0) {
-        setProgress(100);
-        const timer = setTimeout(() => {
-          setProgress(0);
-        }, 350);
-        return () => clearTimeout(timer);
-      }
+      setProgress((prev) => {
+        if (prev > 0) {
+          timer = setTimeout(() => {
+            setProgress(0);
+          }, 350);
+          return 100;
+        }
+        return 0;
+      });
     }
 
     return () => {
       if (interval) clearInterval(interval);
+      if (timer) clearTimeout(timer);
     };
-  }, [isLoading, progress]);
+  }, [isLoading]);
 
   const showBar = progress > 0;
 
