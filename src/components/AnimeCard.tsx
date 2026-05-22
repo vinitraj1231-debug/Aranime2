@@ -54,13 +54,13 @@ export default function AnimeCard({ anime, onClick }: AnimeCardProps) {
         )}
       </div>
       
-      <div className="px-0.5 mt-0.5">
-        <h3 className="font-medium text-[11px] sm:text-xs line-clamp-2 leading-tight group-hover:text-brand transition-colors text-white/95 tracking-tight">
+      <div className="px-1 mt-1">
+        <h3 className="font-extrabold text-xs sm:text-sm line-clamp-2 leading-snug group-hover:text-brand transition-colors text-white/95 tracking-tight">
           {anime.title}
         </h3>
-        <div className="flex items-center gap-1.5 mt-1">
-           <span className="text-[8px] text-white/20 font-black uppercase tracking-wider px-1 py-0.2 border border-white/5 rounded italic">HD</span>
-           <span className="text-[8px] text-white/20 font-bold uppercase tracking-wider">Sub | Dub</span>
+        <div className="flex items-center gap-1.5 mt-1.5">
+           <span className="text-[9px] text-white/40 font-black uppercase tracking-wider px-1.5 py-0.5 border border-white/10 rounded-md bg-white/5 italic">HD</span>
+           <span className="text-[9px] text-white/40 font-black uppercase tracking-wider">Sub | Dub</span>
         </div>
       </div>
     </button>
