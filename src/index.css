@@ -33,3 +33,25 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Premium Outlined SaaS & Luxury UI Icon Override */
+svg.lucide, svg[data-lucide] {
+  stroke-width: 1.25px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  transition: stroke-width 0.2s ease, transform 0.2s ease;
+}
+
+/* Dark Navy & Mint Green Startup Palette Highlights */
+.saas-icon-btn {
+  @apply bg-slate-900/60 border border-slate-800/80 text-white/70 hover:text-emerald-400 hover:border-emerald-500/30 transition-all p-2 rounded-xl backdrop-blur-md;
+}
+
+.saas-accent-badge {
+  @apply bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest font-mono shadow-[0_0_12px_rgba(16,185,129,0.1)];
+}
+
+.saas-navy-card {
+  @apply bg-[#1a1c22] border border-white/[0.06] shadow-xl hover:border-emerald-500/20 transition-all duration-300;
+}
+

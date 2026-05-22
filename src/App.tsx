@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import Admin from "./pages/Admin";
 import Navbar from "./components/Navbar";
@@ -11,23 +11,35 @@ import { db } from "./lib/firebase";
 import { motion, AnimatePresence } from "motion/react";
 import { Wrench, ShieldAlert, ArrowRight } from "lucide-react";
 
-export default function App() {
+function AppContent() {
   const [search, setSearch] = useState("");
   const [isMaintenance, setIsMaintenance] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeVideo, setActiveVideo] = useState<any | null>(null);
+  
+  const location = useLocation();
 
   useEffect(() => {
+    // Safety timeout to prevent infinite loader if Firestore is offline
+    const safetyTimeout = setTimeout(() => {
+      setLoading(false);
+    }, 4500);
+
     const unsub = onSnapshot(doc(db, "config", "maintenance"), (snap) => {
       if (snap.exists()) {
         setIsMaintenance(snap.data().enabled || false);
       }
       setLoading(false);
+      clearTimeout(safetyTimeout);
     }, (error) => {
       console.error("Error checking maintenance state:", error);
       setLoading(false);
+      clearTimeout(safetyTimeout);
     });
-    return () => unsub();
+    return () => {
+      unsub();
+      clearTimeout(safetyTimeout);
+    };
   }, []);
 
   useEffect(() => {
@@ -62,41 +74,8 @@ export default function App() {
     }
   };
 
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
-
-  useEffect(() => {
-    let active = true;
-    const handlePathChange = () => {
-      setTimeout(() => {
-        if (active) {
-          setCurrentPath(window.location.pathname);
-        }
-      }, 0);
-    };
-    window.addEventListener("popstate", handlePathChange);
-    
-    const origPush = window.history.pushState;
-    const origReplace = window.history.replaceState;
-    
-    window.history.pushState = function (...args) {
-      origPush.apply(this, args);
-      handlePathChange();
-    };
-    window.history.replaceState = function (...args) {
-      origReplace.apply(this, args);
-      handlePathChange();
-    };
-
-    return () => {
-      active = false;
-      window.removeEventListener("popstate", handlePathChange);
-      window.history.pushState = origPush;
-      window.history.replaceState = origReplace;
-    };
-  }, []);
-
-  const normalizedPath = currentPath.toLowerCase().trim().replace(/\/$/, "");
-  const isAdminPath = normalizedPath === "/admin" || normalizedPath.startsWith("/admin");
+  const normalizedPath = location.pathname.toLowerCase().trim().replace(/\/$/, "");
+  const isAdminPath = normalizedPath.includes("admin") || window.location.pathname.toLowerCase().includes("admin") || window.location.hash.toLowerCase().includes("admin");
 
   if (loading) {
     return (
@@ -108,7 +87,7 @@ export default function App() {
 
   if (isMaintenance && !isAdminPath) {
     return (
-      <BrowserRouter>
+      <>
         <AgeGate />
         <div className="min-h-screen bg-bg-darker text-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
           {/* Neon Glow spots */}
@@ -122,7 +101,7 @@ export default function App() {
           >
             {/* Maintenance Glowing Ring */}
             <div className="w-20 h-20 bg-brand/10 border border-brand/20 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl relative">
-              <Wrench className="text-brand w-9 h-9 animate-[transform_3s_ease-in-out_infinite] transform hover:rotate-45 transition-transform" />
+              <Wrench strokeWidth={1.2} className="text-brand w-9 h-9 animate-[transform_3s_ease-in-out_infinite] transform hover:rotate-45 transition-transform" />
               <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 items-center justify-center text-[8px] font-black font-mono">!</span>
@@ -133,7 +112,7 @@ export default function App() {
               AR<span className="text-brand">ANIME</span> CALIBRATION
             </h2>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-[10px] font-black text-red-400 uppercase tracking-widest mb-6">
-              <ShieldAlert className="w-3.5 h-3.5" />
+              <ShieldAlert strokeWidth={1.2} className="w-3.5 h-3.5" />
               <span>Offline Maintenance Active</span>
             </div>
 
@@ -147,25 +126,25 @@ export default function App() {
             </div>
 
             {/* Secret entrance button */}
-            <a 
-              href="/admin" 
-              className="group inline-flex items-center gap-2 text-[10px] font-black text-white/30 hover:text-white uppercase tracking-widest transition-colors cursor-pointer"
+            <Link 
+              to="/admin" 
+              className="group inline-flex items-center gap-2 text-[10px] font-black text-white/30 hover:text-white uppercase tracking-widest transition-colors cursor-pointer animate-pulse"
             >
               <span>Administrative Entrance</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform text-brand" />
-            </a>
+              <ArrowRight strokeWidth={1.2} className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform text-brand" />
+            </Link>
           </motion.div>
 
           <footer className="mt-12 text-center opacity-25 z-10">
             <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/50">AR ANIME SERVICE NET | SECURED CONTAINER</p>
           </footer>
         </div>
-      </BrowserRouter>
+      </>
     );
   }
 
   return (
-    <BrowserRouter>
+    <>
       {/* 18+ Age Gate overlay */}
       <AgeGate />
       
@@ -199,6 +178,14 @@ export default function App() {
           />
         )}
       </AnimatePresence>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   );
 }

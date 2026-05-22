@@ -87,11 +87,10 @@ export default function Home({ search = "", setSearch }: HomeProps) {
           <div id="trending-scroll-section" className="space-y-4 pt-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Flame className="w-5 h-5 text-brand animate-bounce" />
+                <Flame strokeWidth={1.2} className="w-5 h-5 text-brand animate-bounce" />
                 <h2 className="text-xl font-bold uppercase tracking-tight italic text-white">
                   Trending Updates
                 </h2>
-                <span className="text-[9px] bg-red-500/10 text-red-400 px-2 py-0.5 rounded font-black uppercase tracking-wider font-mono">Real-time ranking active</span>
               </div>
             </div>
 
@@ -130,7 +129,7 @@ export default function Home({ search = "", setSearch }: HomeProps) {
                   {/* Play Action button display on hover */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="w-9 h-9 bg-brand rounded-full flex items-center justify-center shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform">
-                      <Play className="text-white fill-current w-4 h-4 ml-0.5" />
+                      <Play strokeWidth={1.2} className="text-white fill-current w-4 h-4 ml-0.5" />
                     </div>
                   </div>
 
