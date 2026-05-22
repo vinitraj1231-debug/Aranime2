@@ -45,14 +45,28 @@ export default function VideoPlayerModal({
   const getEmbedUrl = (url: string): string => {
     if (!url) return "";
     let formatted = url.trim();
+    const lowercase = formatted.toLowerCase();
+
+    // YouTube Shorts converter
+    if (lowercase.includes("youtube.com/shorts/")) {
+      try {
+        const parts = formatted.split("/shorts/");
+        const videoId = parts[1]?.split("?")[0]?.split("/")[0];
+        if (videoId) {
+          return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
 
     // YouTube watch URLs converter
-    if (formatted.includes("youtube.com/watch?v=")) {
+    if (lowercase.includes("youtube.com/watch?v=")) {
       try {
         const urlObj = new URL(formatted);
         const videoId = urlObj.searchParams.get("v");
         if (videoId) {
-          return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+          return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
         }
       } catch (e) {
         // Fallback
@@ -60,12 +74,12 @@ export default function VideoPlayerModal({
     }
 
     // YouTube short links converter
-    if (formatted.includes("youtu.be/")) {
+    if (lowercase.includes("youtu.be/")) {
       try {
         const parts = formatted.split("youtu.be/");
-        const videoId = parts[1]?.split("?")[0];
+        const videoId = parts[1]?.split("?")[0]?.split("/")[0];
         if (videoId) {
-          return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+          return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
         }
       } catch (e) {
         // Fallback
@@ -73,7 +87,7 @@ export default function VideoPlayerModal({
     }
 
     // Google Drive share links converter
-    if (formatted.includes("drive.google.com/file/d/") && !formatted.includes("/preview")) {
+    if (lowercase.includes("drive.google.com/file/d/") && !lowercase.includes("/preview")) {
       try {
         const parts = formatted.split("/file/d/");
         const fileId = parts[1]?.split("/")[0];
@@ -86,6 +100,21 @@ export default function VideoPlayerModal({
     }
 
     return formatted;
+  };
+
+  const openExternalLink = () => {
+    const targetUrl = currentQuality.url || "";
+    if (!targetUrl) return;
+    try {
+      const tg = (window as any).Telegram?.WebApp;
+      if (tg?.openLink) {
+        tg.openLink(targetUrl);
+      } else {
+        window.open(targetUrl, "_blank", "noopener,noreferrer");
+      }
+    } catch (e) {
+      window.open(targetUrl, "_blank", "noopener,noreferrer");
+    }
   };
 
   const detectPlayerMode = (url: string): "video" | "iframe" => {
@@ -178,13 +207,26 @@ export default function VideoPlayerModal({
             {title}
           </h2>
         </div>
-        <button 
-          onClick={onClose}
-          className="p-3 bg-white/5 border border-white/5 text-white/50 hover:text-white hover:bg-white/15 h-12 w-12 rounded-xl flex items-center justify-center transition-all cursor-pointer hover:rotate-90"
-          title="Exit player"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        
+        <div className="flex items-center gap-2 shrink-0">
+          {currentQuality.url && (
+            <button
+              onClick={openExternalLink}
+              className="px-4 h-12 bg-brand hover:bg-brand-dark active:scale-95 text-white rounded-xl flex items-center gap-2 transition-all cursor-pointer font-black text-xs uppercase tracking-wider shadow-lg shadow-brand/15"
+              title="Open video externally in Telegram browser or YouTube"
+            >
+              <Maximize className="w-4 h-4" />
+              <span>Link Pe Dekhein 🚀</span>
+            </button>
+          )}
+          <button 
+            onClick={onClose}
+            className="p-3 bg-white/5 border border-white/5 text-white/50 hover:text-white hover:bg-white/15 h-12 w-12 rounded-xl flex items-center justify-center transition-all cursor-pointer hover:rotate-90"
+            title="Exit player"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Main Screen Stage */}
@@ -251,6 +293,14 @@ export default function VideoPlayerModal({
           />
         )}
       </div>
+
+      {playerMode === "iframe" && (
+        <div className="w-full max-w-3xl mt-3 text-center bg-brand/10 border border-brand/20 py-2 sm:py-2.5 px-4 rounded-xl z-10">
+          <p className="text-white/95 text-[10px] md:text-xs font-black uppercase tracking-wider">
+            📺 Video Play Nahi Ho Raha? <button onClick={openExternalLink} className="text-brand hover:underline underline-offset-4 font-black cursor-pointer">Yahan Click Karke Direct Telegram Me Dekhein 🚀</button>
+          </p>
+        </div>
+      )}
 
       {/* Bottom Option Controllers */}
       <div className="w-full max-w-3xl mt-6 flex flex-col md:flex-row items-center justify-between gap-4 z-10 bg-bg-dark border border-white/5 p-4 rounded-2xl">
