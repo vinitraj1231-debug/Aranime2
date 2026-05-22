@@ -163,30 +163,30 @@ export default function Home({ search = "", setSearch }: HomeProps) {
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 md:w-auto shrink-0 self-end">
             {/* Sorting Toggle */}
-            <div className="flex bg-bg-dark/80 backdrop-blur-xl border border-white/5 rounded-full p-1 shadow-inner shrink-0 leading-none">
+            <div className="flex bg-bg-dark/80 backdrop-blur-xl border border-white/5 rounded-full p-1 shadow-inner shrink-0 items-center justify-center gap-1">
               <button
                 id="sort-btn-latest"
                 onClick={() => setSortBy("latest")}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                title="Sort by Latest"
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
                   sortBy === "latest"
-                  ? "bg-white/10 text-white shadow-sm border border-white/5"
-                  : "text-white/35 hover:text-white"
+                  ? "bg-white/10 text-brand shadow-sm border border-white/5"
+                  : "text-white/35 hover:text-white hover:bg-white/5"
                 }`}
               >
-                <Clock className="w-3.5 h-3.5 text-brand" />
-                <span>Latest</span>
+                <Clock className="w-4 h-4" />
               </button>
               <button
                 id="sort-btn-trending"
                 onClick={() => setSortBy("trending")}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                title="Sort by Trending"
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
                   sortBy === "trending"
                   ? "bg-brand text-white shadow-lg shadow-brand/25 border border-brand/10"
-                  : "text-white/35 hover:text-white"
+                  : "text-white/35 hover:text-white hover:bg-white/5"
                 }`}
               >
-                <Flame className="w-3.5 h-3.5" />
-                <span>Trending</span>
+                <Flame className="w-4 h-4" />
               </button>
             </div>
           </div>
