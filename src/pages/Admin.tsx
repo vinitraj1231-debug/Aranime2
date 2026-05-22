@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent, useMemo } from "react";
-import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp, updateDoc, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { 
   Plus, 
@@ -9,6 +9,7 @@ import {
   Image as ImageIcon, 
   BarChart3, 
   ShieldCheck, 
+  ShieldAlert,
   Search, 
   Star, 
   Tag, 
@@ -36,6 +37,8 @@ export default function Admin() {
   const [dbStats, setDbStats] = useState<any[]>([]);
   const [timeframe, setTimeframe] = useState<7 | 14 | 30>(14);
   const [searchQuery, setSearchQuery] = useState("");
+  const [maintenance, setMaintenance] = useState(false);
+  const [isUpdatingMaintenance, setIsUpdatingMaintenance] = useState(false);
   
   // Forms
   const [animeForm, setAnimeForm] = useState({ 
@@ -72,10 +75,17 @@ export default function Admin() {
     const unsubStats = onSnapshot(query(collection(db, "stats")), (snap) => 
       setDbStats(snap.docs.map(d => d.data())));
 
+    const unsubMaintenance = onSnapshot(doc(db, "config", "maintenance"), (snap) => {
+      if (snap.exists()) {
+        setMaintenance(snap.data().enabled || false);
+      }
+    });
+
     return () => { 
       unsubAnime(); 
       unsubBanners(); 
       unsubStats();
+      unsubMaintenance();
     };
   }, [isAuthenticated]);
 
@@ -149,6 +159,20 @@ export default function Admin() {
     await updateDoc(doc(db, "anime", id), {
       isFeatured: !currentFeatured
     });
+  };
+
+  const handleToggleMaintenance = async () => {
+    setIsUpdatingMaintenance(true);
+    try {
+      await setDoc(doc(db, "config", "maintenance"), {
+        enabled: !maintenance,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (e) {
+      console.error("Maintenance configuration dynamic modification error:", e);
+    } finally {
+      setIsUpdatingMaintenance(false);
+    }
   };
 
   const handleAddBanner = async (e: FormEvent) => {
@@ -354,6 +378,59 @@ export default function Admin() {
               <StatCard label="Global Media Views" value={totalViews} icon={<Eye className="text-cyan-400" />} />
               <StatCard label="Promo Spotlight Slots" value={banners.length} icon={<ImageIcon className="text-purple-400" />} />
               <StatCard label="Featured Reels" value={anime.filter(a => a.isFeatured).length} icon={<Trophy className="text-yellow-400" />} />
+            </div>
+
+            {/* Maintenance Mode Controller */}
+            <div className="bg-bg-dark border border-white/5 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden shadow-2xl">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all ${maintenance ? 'bg-red-500/10 border-red-500/30' : 'bg-green-500/10 border-green-500/30'}`}>
+                  {maintenance ? (
+                    <ShieldAlert className="text-red-500 w-6 h-6 animate-pulse" />
+                  ) : (
+                    <ShieldCheck className="text-green-500 w-6 h-6" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-sm font-black uppercase text-white tracking-tight flex items-center gap-2">
+                    System Maintenance Shield
+                    {maintenance ? (
+                      <span className="text-[8px] bg-red-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">ACTIVE</span>
+                    ) : (
+                      <span className="text-[8px] bg-emerald-500/20 text-emerald-400 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider border border-emerald-500/20">Secured</span>
+                    )}
+                  </h3>
+                  <p className="text-[10px] text-white/30 uppercase tracking-widest font-mono mt-0.5">
+                    {maintenance 
+                      ? "The application is currently offline to public visitors. Normal services are suspended." 
+                      : "The application is online and operating regularly for all users."}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                id="toggle-maintenance-btn"
+                onClick={handleToggleMaintenance}
+                disabled={isUpdatingMaintenance}
+                className={`px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-md flex items-center gap-2 ${
+                  maintenance 
+                    ? "bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.02] active:scale-95 text-white shadow-emerald-500/10" 
+                    : "bg-red-600 hover:bg-red-700 hover:scale-[1.02] active:scale-95 text-white shadow-red-500/10"
+                }`}
+              >
+                {isUpdatingMaintenance ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : maintenance ? (
+                  <>
+                    <Unlock className="w-3.5 h-3.5" />
+                    Disable Maintenance (Go Live)
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-3.5 h-3.5" />
+                    Enable Maintenance (Go Offline)
+                  </>
+                )}
+              </button>
             </div>
 
             {/* Click Trends Chart Card */}

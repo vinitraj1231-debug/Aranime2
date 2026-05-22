@@ -24,8 +24,7 @@ interface HomeProps {
 
 export default function Home({ search = "", setSearch }: HomeProps) {
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [sortBy, setSortBy] = useState<'latest' | 'trending'>('latest');
-  const [featuredAnime, setFeaturedAnime] = useState<Anime[]>([]);
+  const [allAnime, setAllAnime] = useState<Anime[]>([]);
 
   const categories = ["All", "Action", "Comedy", "Drama", "Fantasy", "Romance", "Sci-Fi", "Slice of Life", "Adventure", "Supernatural"];
 
@@ -33,10 +32,12 @@ export default function Home({ search = "", setSearch }: HomeProps) {
     const q = query(collection(db, "anime"), orderBy("createdAt", "desc"));
     return onSnapshot(q, (snapshot) => {
       const all: Anime[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Anime));
-      // Filter out specifically the ones marked as isFeatured
-      setFeaturedAnime(all.filter(item => item.isFeatured === true));
+      setAllAnime(all);
     });
   }, []);
+
+  const trendingAnime = [...allAnime].sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
+  const topTrending = trendingAnime.slice(0, 15);
 
   const handleLinkClick = async (id: string, link: string) => {
     try {
@@ -57,25 +58,25 @@ export default function Home({ search = "", setSearch }: HomeProps) {
       
       <div className="max-w-7xl mx-auto w-full px-4 space-y-10">
 
-        {/* Dynamic Horizontal Scroll Spotlight Section (Admin Controlled) */}
-        {featuredAnime.length > 0 && (
-          <div id="featured-scroll-section" className="space-y-4 pt-4">
+        {/* Dynamic Horizontal Scroll Spotlight Section (Clicks Trending) */}
+        {topTrending.length > 0 && (
+          <div id="trending-scroll-section" className="space-y-4 pt-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-brand animate-pulse" />
+                <Flame className="w-5 h-5 text-brand animate-bounce" />
                 <h2 className="text-xl font-bold uppercase tracking-tight italic text-white">
-                  Featured Spotlights
+                  Trending Updates
                 </h2>
-                <span className="text-[9px] bg-brand/10 text-brand px-2 py-0.5 rounded font-black uppercase tracking-wider font-mono">Spotlight row active</span>
+                <span className="text-[9px] bg-red-500/10 text-red-400 px-2 py-0.5 rounded font-black uppercase tracking-wider font-mono">Real-time ranking active</span>
               </div>
             </div>
 
             {/* Horizontal Scroll Containers */}
             <div 
-              id="featured-row-container" 
+              id="trending-row-container" 
               className="flex gap-4 overflow-x-auto pb-4 pt-1 snap-x no-scrollbar custom-scrollbar scroll-smooth"
             >
-              {featuredAnime.map((item) => (
+              {topTrending.map((item, index) => (
                 <div
                   key={item.id}
                   onClick={() => handleLinkClick(item.id, item.link)}
@@ -91,13 +92,10 @@ export default function Home({ search = "", setSearch }: HomeProps) {
                   {/* Glass Gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-95 flex flex-col justify-end p-4" />
 
-                  {/* Rating Badge */}
-                  {item.rating && (
-                    <div className="absolute top-3 left-3 px-2 py-0.5 bg-black/85 backdrop-blur-md rounded-lg text-[9px] font-black text-brand uppercase tracking-wider border border-white/5 flex items-center gap-1">
-                      <span className="text-yellow-400">★</span>
-                      <span className="text-white font-bold">{Number(item.rating).toFixed(1)}</span>
-                    </div>
-                  )}
+                  {/* Rank Badge */}
+                  <div className="absolute top-3 left-3 px-2.5 py-1 bg-brand rounded-lg text-[10px] font-black text-white uppercase tracking-wider border border-white/10 flex items-center gap-1 shadow-lg">
+                    <span>Rank #{index + 1}</span>
+                  </div>
 
                   {/* View counter */}
                   <div className="absolute top-3 right-3 px-2 py-0.5 bg-black/85 backdrop-blur-md rounded-lg text-[8px] font-black text-white/70 border border-white/5 uppercase tracking-wide flex items-center gap-1">
@@ -160,40 +158,10 @@ export default function Home({ search = "", setSearch }: HomeProps) {
             </div>
             <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.2em] ml-5">Exploration / Database / v2.0</p>
           </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 md:w-auto shrink-0 self-end">
-            {/* Sorting Toggle */}
-            <div className="flex bg-bg-dark/80 backdrop-blur-xl border border-white/5 rounded-full p-1 shadow-inner shrink-0 items-center justify-center gap-1">
-              <button
-                id="sort-btn-latest"
-                onClick={() => setSortBy("latest")}
-                title="Sort by Latest"
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                  sortBy === "latest"
-                  ? "bg-white/10 text-brand shadow-sm border border-white/5"
-                  : "text-white/35 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <Clock className="w-4 h-4" />
-              </button>
-              <button
-                id="sort-btn-trending"
-                onClick={() => setSortBy("trending")}
-                title="Sort by Trending"
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                  sortBy === "trending"
-                  ? "bg-brand text-white shadow-lg shadow-brand/25 border border-brand/10"
-                  : "text-white/35 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <Flame className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
         </div>
         
-        {/* Main Grid Component */}
-        <AnimeGrid search={search} category={selectedCategory} sortBy={sortBy} />
+        {/* Main Grid Component (normal latest list) */}
+        <AnimeGrid search={search} category={selectedCategory} sortBy="latest" />
       </div>
 
       {/* Footer Info / SEO Stuff */}
