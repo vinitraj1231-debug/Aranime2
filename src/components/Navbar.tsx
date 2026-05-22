@@ -165,16 +165,13 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
       <nav className="bg-bg-dark border-b border-white/5 sticky top-0 z-50 px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <Link id="nav-logo" to="/" className="flex items-center gap-1 group shrink-0">
-            <div className="bg-brand px-2.5 py-1.5 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-              <span className="text-white font-black italic text-xl leading-none">B</span>
-            </div>
-            <span className="text-2xl font-black bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent uppercase tracking-tighter italic ml-0.5">
-              B BLAZE
+            <span className="text-2xl font-black bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent uppercase tracking-tighter italic">
+              BLAZE
             </span>
           </Link>
 
           {/* Header Search Bar */}
-          <div className="relative group max-w-[140px] xs:max-w-[180px] sm:max-w-xs md:max-w-sm w-full mr-auto ml-2 px-1 sm:px-2">
+          <div className="relative group max-w-[140px] xs:max-w-[180px] sm:max-w-xs md:max-w-sm w-full mr-auto ml-12 px-1 sm:px-2">
             <div className="absolute -inset-0.5 bg-brand/15 rounded-full blur opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
             <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 w-3 h-3 text-white/30 group-focus-within:text-brand transition-colors" />
             <input 
@@ -190,7 +187,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
                   saveSearchQuery(search);
                 }
               }}
-              className="relative w-full bg-black/40 backdrop-blur-md border border-white/5 focus:border-brand/40 outline-none rounded-full py-1.5 pl-8 sm:pl-10 pr-4 text-[10px] sm:text-xs text-center transition-all placeholder:text-white/20 text-white shadow-inner font-bold tracking-wide"
+              className="relative w-full bg-black/40 backdrop-blur-md border border-white/5 focus:border-brand/40 outline-none rounded-full py-1.5 pl-8 sm:pl-10 pr-4 text-[9px] sm:text-[10px] text-center transition-all placeholder:text-white/20 text-white shadow-inner font-bold tracking-wide"
             />
 
             {/* Recent Searches Dropdown Panel */}
@@ -274,7 +271,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
               <div className="flex items-center justify-between pb-6 border-b border-white/5 mb-6">
                 <div>
                   <h3 className="text-lg font-black tracking-tight italic">
-                    B <span className="text-brand">BLAZE</span> MENU
+                    <span className="text-brand">BLAZE</span> MENU
                   </h3>
                   <p className="text-[9px] text-white/30 uppercase tracking-widest font-mono">Platform Portal v2.0</p>
                 </div>
@@ -413,7 +410,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
                             <p className="font-bold text-white">General Compliance:</p>
                             <p>You confirm you are at least 18 years old or possess legal majority status in your jurisdiction.</p>
                             <p className="font-bold text-white">External Catalog Redir:</p>
-                            <p>All items provided as links point out to external, self-hosted distribution folders. B BLAZE does not host any media files directly in its app container.</p>
+                            <p>All items provided as links point out to external, self-hosted distribution folders. BLAZE does not host any media files directly in its app container.</p>
                             <p className="font-bold text-white">Updates:</p>
                             <p>Catalog listings receive periodic live index patches by authorized administrators using a secure master gateway key.</p>
                           </div>
@@ -461,7 +458,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
 
               {/* Menu Footer */}
               <div className="pt-6 border-t border-white/5 mt-auto text-center space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/30">B BLAZE NETWORK</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/30">BLAZE NETWORK</p>
                 <p className="text-[9px] text-white/15 font-mono">RELEASE GROUP DISTRIBUTION PORTAL</p>
               </div>
             </motion.div>
