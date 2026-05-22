@@ -80,7 +80,8 @@ export default function Admin() {
     setPasscodeError("");
 
     try {
-      const res = await fetch("/api/verify-passcode", {
+      const targetUrl = `${window.location.origin}/api/verify-passcode`;
+      const res = await fetch(targetUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ passcode })
@@ -94,8 +95,9 @@ export default function Admin() {
       } else {
         setPasscodeError(data.error || "Invalid passcode credentials. Try again.");
       }
-    } catch (err) {
-      setPasscodeError("Server connection error. Please try again.");
+    } catch (err: any) {
+      console.error("Passcode verification failed:", err);
+      setPasscodeError(`Server connection error (${err.message || err}). Please try again.`);
     } finally {
       setIsVerifying(false);
     }

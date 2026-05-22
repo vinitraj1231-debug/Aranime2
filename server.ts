@@ -15,6 +15,17 @@ async function startServer() {
 
   app.use(express.json());
 
+  // CORS and Preflight Headers to prevent iFrame preview blocking
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(200);
+    }
+    next();
+  });
+
   // API Health Check
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
