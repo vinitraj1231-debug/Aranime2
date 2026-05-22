@@ -41,38 +41,126 @@ export default function VideoPlayerModal({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const playTrackedRef = useRef(false);
 
-  // Sync quality change but keep timestamp
-  const handleQualityChange = (newQual: typeof qualities[0]) => {
-    if (!videoRef.current || !newQual) return;
-    const currentTime = videoRef.current.currentTime;
-    const isPaused = videoRef.current.paused;
-    
-    setLoading(true);
-    setCurrentQuality(newQual);
-    
-    // Switch source and seek back to the last current playback timestamp after loading
-    videoRef.current.src = newQual.url!;
-    videoRef.current.load();
-    
-    const onMetadataLoaded = () => {
-      if (videoRef.current) {
-        videoRef.current.currentTime = currentTime;
-        if (!isPaused) {
-          videoRef.current.play().catch(e => console.log("Auto-resume playback prevented:", e));
+  // Converts standard non-embeddable URLs on-the-fly to beautiful sandbox-friendly embed links
+  const getEmbedUrl = (url: string): string => {
+    if (!url) return "";
+    let formatted = url.trim();
+
+    // YouTube watch URLs converter
+    if (formatted.includes("youtube.com/watch?v=")) {
+      try {
+        const urlObj = new URL(formatted);
+        const videoId = urlObj.searchParams.get("v");
+        if (videoId) {
+          return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
         }
-        setLoading(false);
-        videoRef.current.removeEventListener("loadedmetadata", onMetadataLoaded);
+      } catch (e) {
+        // Fallback
       }
-    };
-    
-    videoRef.current.addEventListener("loadedmetadata", onMetadataLoaded);
+    }
+
+    // YouTube short links converter
+    if (formatted.includes("youtu.be/")) {
+      try {
+        const parts = formatted.split("youtu.be/");
+        const videoId = parts[1]?.split("?")[0];
+        if (videoId) {
+          return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
+
+    // Google Drive share links converter
+    if (formatted.includes("drive.google.com/file/d/") && !formatted.includes("/preview")) {
+      try {
+        const parts = formatted.split("/file/d/");
+        const fileId = parts[1]?.split("/")[0];
+        if (fileId) {
+          return `https://drive.google.com/file/d/${fileId}/preview`;
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
+
+    return formatted;
   };
+
+  const detectPlayerMode = (url: string): "video" | "iframe" => {
+    if (!url) return "video";
+    const lowercase = url.toLowerCase();
+
+    // Standard video sharing embedding triggers
+    if (
+      lowercase.includes("embed") ||
+      lowercase.includes("iframe") ||
+      lowercase.includes("youtube.com") ||
+      lowercase.includes("youtu.be") ||
+      lowercase.includes("drive.google.com") ||
+      lowercase.includes("vimeo.com") ||
+      lowercase.includes("player.") ||
+      lowercase.includes("ok.ru") ||
+      lowercase.includes("dood") ||
+      lowercase.includes("streamtape") ||
+      lowercase.includes("t.me") ||
+      lowercase.includes("telegram")
+    ) {
+      return "iframe";
+    }
+
+    const directVideoExtensions = [".mp4", ".webm", ".m3u8", ".ogg", ".mov", ".avi", ".ts", ".mkv"];
+    const hasExtension = directVideoExtensions.some(ext => lowercase.split('?')[0].endsWith(ext));
+
+    return hasExtension ? "video" : "iframe";
+  };
+
+  const [playerMode, setPlayerMode] = useState<"video" | "iframe">(() => {
+    return detectPlayerMode(currentQuality.url || "");
+  });
 
   // Track play exactly once upon starting playback
   const handlePlay = () => {
     if (!playTrackedRef.current) {
       playTrackedRef.current = true;
       onPlayTracked();
+    }
+  };
+
+  // Sync quality change but keep timestamp
+  const handleQualityChange = (newQual: typeof qualities[0]) => {
+    if (!newQual) return;
+    setLoading(true);
+    setCurrentQuality(newQual);
+    setErrorFlag(false);
+
+    const targetMode = detectPlayerMode(newQual.url || "");
+    setPlayerMode(targetMode);
+
+    if (targetMode === "video") {
+      setTimeout(() => {
+        if (!videoRef.current) return;
+        try {
+          videoRef.current.src = newQual.url!;
+          videoRef.current.load();
+          
+          const onMetadataLoaded = () => {
+            if (videoRef.current) {
+              setLoading(false);
+              videoRef.current.play().catch(e => console.log("Playback start prevented:", e));
+              videoRef.current.removeEventListener("loadedmetadata", onMetadataLoaded);
+            }
+          };
+          
+          videoRef.current.addEventListener("loadedmetadata", onMetadataLoaded);
+        } catch (e) {
+          console.error("Video quality shift bug:", e);
+          setLoading(false);
+        }
+      }, 50);
+    } else {
+      // Iframe mode finishes resolving with native frame onLoad
     }
   };
 
@@ -132,50 +220,98 @@ export default function VideoPlayerModal({
           </div>
         )}
 
-        <video
-          ref={videoRef}
-          src={currentQuality.url || ""}
-          controls
-          autoPlay
-          onPlay={handlePlay}
-          onCanPlay={() => setLoading(false)}
-          onWaiting={() => setLoading(true)}
-          onError={() => {
-            setLoading(false);
-            if (currentQuality.url) {
-              setErrorFlag(true);
-            }
-          }}
-          className="w-full h-full object-cover rounded-3xl bg-black"
-        />
+        {playerMode === "iframe" ? (
+          <iframe
+            src={getEmbedUrl(currentQuality.url || "")}
+            className="w-full h-full border-0 rounded-3xl bg-black"
+            allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+            allowFullScreen
+            referrerPolicy="no-referrer"
+            onLoad={() => {
+              setLoading(false);
+              handlePlay();
+            }}
+          />
+        ) : (
+          <video
+            ref={videoRef}
+            src={currentQuality.url || ""}
+            controls
+            autoPlay
+            onPlay={handlePlay}
+            onCanPlay={() => setLoading(false)}
+            onWaiting={() => setLoading(true)}
+            onError={() => {
+              setLoading(false);
+              if (currentQuality.url) {
+                setErrorFlag(true);
+              }
+            }}
+            className="w-full h-full object-cover rounded-3xl bg-black"
+          />
+        )}
       </div>
 
       {/* Bottom Option Controllers */}
-      <div className="w-full max-w-3xl mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 z-10 bg-bg-dark border border-white/5 p-4 rounded-2xl">
+      <div className="w-full max-w-3xl mt-6 flex flex-col md:flex-row items-center justify-between gap-4 z-10 bg-bg-dark border border-white/5 p-4 rounded-2xl">
         {/* Aspect orientation switcher */}
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-white/35 font-black uppercase tracking-wider">Layout View:</span>
-          <div className="flex gap-1.5 p-1 bg-black/60 rounded-xl border border-white/5">
-            <button
-              onClick={() => setAspect("horizontal")}
-              className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
-                aspect === "horizontal" 
-                  ? "bg-brand text-white shadow-md" 
-                  : "text-white/40 hover:text-white"
-              }`}
-            >
-              Landscape
-            </button>
-            <button
-              onClick={() => setAspect("vertical")}
-              className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
-                aspect === "vertical" 
-                  ? "bg-brand text-white shadow-md" 
-                  : "text-white/40 hover:text-white"
-              }`}
-            >
-              Portrait Reel
-            </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-white/35 font-black uppercase tracking-wider">Layout:</span>
+            <div className="flex gap-1.5 p-1 bg-black/60 rounded-xl border border-white/5">
+              <button
+                onClick={() => setAspect("horizontal")}
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
+                  aspect === "horizontal" 
+                    ? "bg-brand text-white shadow-md" 
+                    : "text-white/40 hover:text-white"
+                }`}
+              >
+                Landscape
+              </button>
+              <button
+                onClick={() => setAspect("vertical")}
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
+                  aspect === "vertical" 
+                    ? "bg-brand text-white shadow-md" 
+                    : "text-white/40 hover:text-white"
+                }`}
+              >
+                Portrait Reel
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-white/35 font-black uppercase tracking-wider">Engine:</span>
+            <div className="flex gap-1.5 p-1 bg-black/60 rounded-xl border border-white/5">
+              <button
+                onClick={() => {
+                  setPlayerMode("video");
+                  setLoading(false);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
+                  playerMode === "video" 
+                    ? "bg-brand text-white shadow-md" 
+                    : "text-white/40 hover:text-white"
+                }`}
+              >
+                Direct MP4
+              </button>
+              <button
+                onClick={() => {
+                  setPlayerMode("iframe");
+                  setLoading(false);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
+                  playerMode === "iframe" 
+                    ? "bg-brand text-white shadow-md" 
+                    : "text-white/40 hover:text-white"
+                }`}
+              >
+                Embed Frame
+              </button>
+            </div>
           </div>
         </div>
 
@@ -188,7 +324,7 @@ export default function VideoPlayerModal({
                 <button
                   key={q.label}
                   onClick={() => handleQualityChange(q)}
-                  className={`px-3 py-1.5 rounded-lg text-[9px] font-black transition-all ${
+                  className={`px-2.5 py-1.5 rounded-lg text-[9px] font-black transition-all ${
                     currentQuality.label === q.label
                       ? "bg-brand text-white shadow-md"
                       : "text-white/40 hover:text-white"
@@ -198,7 +334,7 @@ export default function VideoPlayerModal({
                 </button>
               ))
             ) : (
-              <span className="text-[9px] font-black text-white/45 px-3 py-1.5">No quality configuration detected</span>
+              <span className="text-[9px] font-black text-white/45 px-3 py-1.5">No quality config found</span>
             )}
           </div>
         </div>

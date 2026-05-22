@@ -40,6 +40,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
   const [profileName, setProfileName] = useState(() => localStorage.getItem("ar_anime_profile_name") || "");
   const [telegram, setTelegram] = useState(() => localStorage.getItem("ar_anime_profile_telegram") || "");
   const [bio, setBio] = useState(() => localStorage.getItem("ar_anime_profile_bio") || "");
+  const [profilePhoto, setProfilePhoto] = useState(() => localStorage.getItem("ar_anime_profile_photo") || "");
   const [isSaved, setIsSaved] = useState(() => localStorage.getItem("ar_anime_profile_saved") === "true");
 
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
@@ -66,24 +67,33 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
     const autoSyncProfile = async () => {
       try {
         const tg = (window as any).Telegram?.WebApp;
+        // Signal that the web app is ready to Telegram client
+        if (tg) {
+          tg.ready();
+          tg.expand?.();
+        }
+        
         const tgUser = tg?.initDataUnsafe?.user;
 
         const uId = getUserId();
         let name = localStorage.getItem("ar_anime_profile_name") || "";
         let username = localStorage.getItem("ar_anime_profile_telegram") || "";
         let currentBio = localStorage.getItem("ar_anime_profile_bio") || "";
+        let currentPhoto = localStorage.getItem("ar_anime_profile_photo") || "";
 
         let changed = false;
 
         if (tgUser) {
           const tgName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ") || "Telegram User";
           const tgUsername = tgUser.username || "tg_" + tgUser.id;
-          const tgBio = tgUser.is_premium ? "Premium Telegram Member" : "Telegram Member";
+          const tgBio = tgUser.is_premium ? "Premium Telegram Member 🌟" : "Telegram Member";
+          const tgPhoto = tgUser.photo_url || "";
 
-          if (name !== tgName || username !== tgUsername) {
+          if (name !== tgName || username !== tgUsername || currentPhoto !== tgPhoto) {
             name = tgName;
             username = tgUsername;
             currentBio = tgBio;
+            currentPhoto = tgPhoto;
             changed = true;
           }
         } else if (!name) {
@@ -91,6 +101,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
           name = "TG Member #" + Math.floor(1000 + Math.random() * 9000);
           username = "tg_user_" + uId.substring(4, 9);
           currentBio = "Watching from Web Browser";
+          currentPhoto = "";
           changed = true;
         }
 
@@ -98,11 +109,13 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
           setProfileName(name);
           setTelegram(username);
           setBio(currentBio);
+          setProfilePhoto(currentPhoto);
           setIsSaved(true);
 
           localStorage.setItem("ar_anime_profile_name", name);
           localStorage.setItem("ar_anime_profile_telegram", username);
           localStorage.setItem("ar_anime_profile_bio", currentBio);
+          localStorage.setItem("ar_anime_profile_photo", currentPhoto);
           localStorage.setItem("ar_anime_profile_saved", "true");
 
           await setDoc(doc(db, "user_profiles", uId), {
@@ -110,6 +123,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
             name: name,
             telegram: username,
             bio: currentBio,
+            photoUrl: currentPhoto,
             createdAt: new Date().toISOString()
           }, { merge: true });
         }
@@ -286,9 +300,18 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
                   {profileName ? (
                     <div className="bg-black/35 rounded-2xl p-4 border border-white/5 space-y-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 bg-brand/10 border border-brand/20 rounded-xl flex items-center justify-center font-black text-brand text-xs">
-                          {profileName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                        </div>
+                        {profilePhoto ? (
+                          <img 
+                            src={profilePhoto} 
+                            alt={profileName} 
+                            referrerPolicy="no-referrer"
+                            className="w-11 h-11 bg-brand/15 border border-brand/20 rounded-xl object-cover shadow-md"
+                          />
+                        ) : (
+                          <div className="w-11 h-11 bg-brand/10 border border-brand/20 rounded-xl flex items-center justify-center font-black text-brand text-xs shrink-0">
+                            {profileName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                          </div>
+                        )}
                         <div className="min-w-0 flex-1">
                           <h4 className="text-xs font-black text-white truncate">{profileName}</h4>
                           <a
