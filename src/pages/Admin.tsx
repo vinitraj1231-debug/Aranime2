@@ -80,24 +80,31 @@ export default function Admin() {
     setPasscodeError("");
 
     try {
-      const targetUrl = `${window.location.origin}/api/verify-passcode`;
-      const res = await fetch(targetUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ passcode })
-      });
+      // Calculate cryptographic SHA-256 hash of the entered passcode
+      const msgBuffer = new TextEncoder().encode(passcode);
+      const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
       
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const correctHash = "6c655543c5912cb7c7e54063dd9f12ccdf7316d9bb08bd8e0763976c72982bcb"; // SHA-256 of "28@RajPapa"
+
+      if (hashHex === correctHash) {
         setIsAuthenticated(true);
         sessionStorage.setItem("ar_anime_admin_unlocked", "true");
         setPasscodeError("");
       } else {
-        setPasscodeError(data.error || "Invalid passcode credentials. Try again.");
+        setPasscodeError("Invalid passcode credentials. Try again.");
       }
     } catch (err: any) {
       console.error("Passcode verification failed:", err);
-      setPasscodeError(`Server connection error (${err.message || err}). Please try again.`);
+      // Fallback in case of environment limitation
+      if (passcode === "28@RajPapa") {
+        setIsAuthenticated(true);
+        sessionStorage.setItem("ar_anime_admin_unlocked", "true");
+        setPasscodeError("");
+      } else {
+        setPasscodeError("Verification error. Check your passcode and try again.");
+      }
     } finally {
       setIsVerifying(false);
     }
@@ -411,7 +418,7 @@ export default function Admin() {
 
                     <button 
                       onClick={() => handleDelete('anime', item.id)} 
-                      className="p-2 hover:bg-red-500/10 text-white/20 hover:text-red-500 rounded-xl transition-all self-start absolute right-2 top-2"
+                      className="p-2.5 bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/15 hover:border-red-600 rounded-xl transition-all absolute right-3 top-3 shadow-md active:scale-95 flex items-center justify-center shrink-0"
                       title="Delete entry"
                     >
                       <Trash2 className="w-4 h-4" />
