@@ -20,6 +20,17 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
+  // Secure Passcode Verification Endpoints
+  app.post("/api/verify-passcode", (req, res) => {
+    const { passcode } = req.body;
+    const correctPasscode = process.env.ADMIN_PASSCODE || "28@RajPapa";
+    if (passcode === correctPasscode) {
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ success: false, error: "Invalid passcode credentials." });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from "motion/react";
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [passcode, setPasscode] = useState("");
   const [passcodeError, setPasscodeError] = useState("");
 
@@ -71,15 +72,32 @@ export default function Admin() {
     };
   }, [isAuthenticated]);
 
-  const handleVerifyPasscode = (e: FormEvent) => {
+  const handleVerifyPasscode = async (e: FormEvent) => {
     e.preventDefault();
-    // Default system passcode
-    if (passcode === "aranime@admin" || passcode === "aranime2") {
-      setIsAuthenticated(true);
-      sessionStorage.setItem("ar_anime_admin_unlocked", "true");
-      setPasscodeError("");
-    } else {
-      setPasscodeError("Invalid passcode credentials. Try again.");
+    if (isVerifying) return;
+    
+    setIsVerifying(true);
+    setPasscodeError("");
+
+    try {
+      const res = await fetch("/api/verify-passcode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passcode })
+      });
+      
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsAuthenticated(true);
+        sessionStorage.setItem("ar_anime_admin_unlocked", "true");
+        setPasscodeError("");
+      } else {
+        setPasscodeError(data.error || "Invalid passcode credentials. Try again.");
+      }
+    } catch (err) {
+      setPasscodeError("Server connection error. Please try again.");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -195,17 +213,25 @@ export default function Admin() {
             <button
               id="admin-verify-btn"
               type="submit"
-              className="w-full bg-brand hover:bg-brand-dark hover:scale-[1.01] active:scale-95 text-white py-4 px-6 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(244,117,33,0.25)]"
+              disabled={isVerifying}
+              className="w-full bg-brand hover:bg-brand-dark hover:scale-[1.01] active:scale-95 disabled:bg-brand/50 disabled:scale-100 disabled:cursor-not-allowed text-white py-4 px-6 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(244,117,33,0.25)] flex items-center justify-center gap-2"
             >
-              Unlock Terminal Door
+              {isVerifying ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                  Verifying Securely...
+                </>
+              ) : (
+                "Unlock Terminal Door"
+              )}
             </button>
           </form>
 
-          {/* Hint Card */}
+          {/* Secure Info Card */}
           <div className="mt-8 p-4 bg-white/5 border border-white/5 rounded-2xl text-center">
             <p className="text-[11px] text-white/35">
-              Enter the platform controller password. <br />
-              <span className="text-brand font-bold">Hint:</span> <code className="bg-black/35 px-2 py-0.5 rounded font-mono text-white/70">aranime@admin</code>
+              Secure server-side validation is active. <br />
+              <span className="text-brand font-bold">Encrypted:</span> Passcode is hidden from browser bundle inspections.
             </p>
           </div>
         </motion.div>
