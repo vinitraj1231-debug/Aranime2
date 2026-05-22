@@ -88,14 +88,14 @@ export default function AnimeGrid({ search = "", category = "All", sortBy = "lat
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-y-7 gap-x-3.5 sm:gap-x-5 p-4 max-w-[1400px] mx-auto">
-        {[...Array(8)].map((_, i) => <CardSkeleton key={i} />)}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-y-8 gap-x-4 sm:gap-x-6 p-4 max-w-[1600px] mx-auto">
+        {[...Array(12)].map((_, i) => <CardSkeleton key={i} />)}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-y-7 gap-x-3.5 sm:gap-x-5 p-4 max-w-[1400px] mx-auto">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-y-8 gap-x-4 sm:gap-x-6 p-4 max-w-[1600px] mx-auto">
       <AnimatePresence mode="popLayout">
         {sortedItems.map((item, index) => (
           <motion.div

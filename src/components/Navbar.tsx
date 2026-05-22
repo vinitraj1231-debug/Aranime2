@@ -169,7 +169,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
               <span className="text-white font-black italic text-xl leading-none">B</span>
             </div>
             <span className="text-2xl font-black bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent uppercase tracking-tighter italic ml-0.5">
-              BLAZE
+              B BLAZE
             </span>
           </Link>
 
@@ -273,8 +273,8 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
             >
               <div className="flex items-center justify-between pb-6 border-b border-white/5 mb-6">
                 <div>
-                  <h3 className="text-lg font-black tracking-tighter italic">
-                    AR<span className="text-brand">ANIME</span> MENU
+                  <h3 className="text-lg font-black tracking-tight italic">
+                    B <span className="text-brand">BLAZE</span> MENU
                   </h3>
                   <p className="text-[9px] text-white/30 uppercase tracking-widest font-mono">Platform Portal v2.0</p>
                 </div>
@@ -413,7 +413,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
                             <p className="font-bold text-white">General Compliance:</p>
                             <p>You confirm you are at least 18 years old or possess legal majority status in your jurisdiction.</p>
                             <p className="font-bold text-white">External Catalog Redir:</p>
-                            <p>All items provided as links point out to external, self-hosted distribution folders. AR ANIME does not host any media files directly in its app container.</p>
+                            <p>All items provided as links point out to external, self-hosted distribution folders. B BLAZE does not host any media files directly in its app container.</p>
                             <p className="font-bold text-white">Updates:</p>
                             <p>Catalog listings receive periodic live index patches by authorized administrators using a secure master gateway key.</p>
                           </div>
@@ -461,7 +461,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
 
               {/* Menu Footer */}
               <div className="pt-6 border-t border-white/5 mt-auto text-center space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/30">AR ANIME NETWORK</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/30">B BLAZE NETWORK</p>
                 <p className="text-[9px] text-white/15 font-mono">RELEASE GROUP DISTRIBUTION PORTAL</p>
               </div>
             </motion.div>

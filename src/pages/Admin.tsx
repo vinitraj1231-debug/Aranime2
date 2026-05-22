@@ -300,7 +300,7 @@ export default function Admin() {
           </div>
 
           <h2 className="text-center text-3xl font-black uppercase tracking-tighter text-white italic">
-            B<span className="text-brand">BLAZE</span> GATEWAY
+            B <span className="text-brand">BLAZE</span> GATEWAY
           </h2>
           <p className="text-center text-[10px] text-white/40 uppercase tracking-[0.25em] font-mono mt-1 mb-8">
             ADMINISTRATIVE ENTRANCE ONLY
@@ -364,7 +364,7 @@ export default function Admin() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10">
         <div>
           <h1 className="text-4xl font-black uppercase tracking-tighter flex items-center gap-3 italic">
-            B<span className="text-brand">BLAZE</span> <span className="text-sm not-italic font-mono uppercase bg-brand/10 text-brand px-2.5 py-1 rounded">Panel</span>
+            B <span className="text-brand">BLAZE</span> <span className="text-sm not-italic font-mono uppercase bg-brand/10 text-brand px-2.5 py-1 rounded">Panel</span>
           </h1>
           <p className="text-white/40 text-[10px] mt-1 font-mono uppercase tracking-widest">Connected with Local Keys | Master Gate bypass</p>
         </div>
