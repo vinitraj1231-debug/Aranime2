@@ -17,7 +17,9 @@ import {
   Edit3, 
   RefreshCw,
   History,
-  Trash2
+  Trash2,
+  Sun,
+  Moon
 } from "lucide-react";
 import { useState, useEffect, FormEvent, MouseEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -52,6 +54,15 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
     }
   });
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  const [theme, setTheme] = useState<"dark" | "midnight">(() => {
+    return (localStorage.getItem("ar_anime_theme") as "dark" | "midnight") || "dark";
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("ar_anime_theme", theme);
+  }, [theme]);
 
   const getUserId = () => {
     let id = localStorage.getItem("ar_anime_user_id");
@@ -232,6 +243,19 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
             </AnimatePresence>
           </div>
 
+          {/* Quick Theme Toggle Button */}
+          <button
+            onClick={() => setTheme(theme === "dark" ? "midnight" : "dark")}
+            className="p-2 bg-white/5 hover:bg-white/10 active:scale-95 text-white/50 hover:text-white rounded-xl transition-all border border-white/5 flex items-center justify-center shrink-0 w-9 h-9 sm:w-10 sm:h-10 cursor-pointer"
+            title={theme === "dark" ? "Switch to Midnight Theme" : "Switch to Deep Dark Theme"}
+          >
+            {theme === "dark" ? (
+              <Moon className="w-4 h-4 text-amber-400 fill-amber-400/20" />
+            ) : (
+              <Sun className="w-4 h-4 text-sky-400 fill-sky-400/20" />
+            )}
+          </button>
+
           {/* 3-line Hamburger Menu representation */}
           <button
             id="nav-hamburger-btn"
@@ -342,6 +366,38 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
                        <span className="text-[10px] font-bold uppercase tracking-widest">Syncing Telegram Context...</span>
                     </div>
                   )}
+                </div>
+
+                {/* Theme Customization Options Card */}
+                <div className="bg-bg-darker border border-white/5 p-4 rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-brand">App Customization</span>
+                    <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest">Theme Mode</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                    <button
+                      onClick={() => setTheme("dark")}
+                      className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        theme === "dark"
+                          ? "bg-brand text-white shadow-lg shadow-brand/10"
+                          : "text-white/40 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <Moon className="w-3.5 h-3.5" />
+                      <span>Deep Dark</span>
+                    </button>
+                    <button
+                      onClick={() => setTheme("midnight")}
+                      className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        theme === "midnight"
+                          ? "bg-brand text-white shadow-lg shadow-brand/10"
+                          : "text-white/40 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <Sun className="w-3.5 h-3.5" />
+                      <span>Midnight Blue</span>
+                    </button>
+                  </div>
                 </div>
                 
                 {/* Brand description or badge */}
