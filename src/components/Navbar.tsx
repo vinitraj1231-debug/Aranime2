@@ -1,8 +1,26 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { User } from "firebase/auth";
-import { Menu, X, ShieldAlert, FileText, Lock, ChevronRight, Scale, Info, Search } from "lucide-react";
-import { useState } from "react";
+import { 
+  Menu, 
+  X, 
+  ShieldAlert, 
+  FileText, 
+  Lock, 
+  ChevronRight, 
+  Scale, 
+  Info, 
+  Search, 
+  User as UserIcon, 
+  Send, 
+  UserCheck, 
+  MessageSquare, 
+  Edit3, 
+  RefreshCw 
+} from "lucide-react";
+import { useState, useEffect, FormEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 interface NavbarProps {
   user: User | null;
@@ -16,6 +34,62 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
   const [activeSection, setActiveSection] = useState<'none' | 'terms' | 'privacy'>('none');
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [profileName, setProfileName] = useState(() => localStorage.getItem("ar_anime_profile_name") || "");
+  const [telegram, setTelegram] = useState(() => localStorage.getItem("ar_anime_profile_telegram") || "");
+  const [bio, setBio] = useState(() => localStorage.getItem("ar_anime_profile_bio") || "");
+  const [isSaved, setIsSaved] = useState(() => localStorage.getItem("ar_anime_profile_saved") === "true");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [profileError, setProfileError] = useState("");
+
+  const getUserId = () => {
+    let id = localStorage.getItem("ar_anime_user_id");
+    if (!id) {
+      id = "usr_" + Math.random().toString(36).substring(2, 11);
+      localStorage.setItem("ar_anime_user_id", id);
+    }
+    return id;
+  };
+
+  const handleSaveProfile = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!profileName.trim() || !telegram.trim()) {
+      setProfileError("Name and Telegram are required.");
+      return;
+    }
+    setIsSaving(true);
+    setProfileError("");
+
+    try {
+      const uId = getUserId();
+      let formattedTelegram = telegram.trim();
+      if (formattedTelegram.startsWith("@")) {
+        formattedTelegram = formattedTelegram.substring(1);
+      }
+
+      await setDoc(doc(db, "user_profiles", uId), {
+        id: uId,
+        name: profileName.trim(),
+        telegram: formattedTelegram,
+        bio: bio.trim(),
+        createdAt: new Date().toISOString()
+      });
+
+      localStorage.setItem("ar_anime_profile_name", profileName.trim());
+      localStorage.setItem("ar_anime_profile_telegram", formattedTelegram);
+      localStorage.setItem("ar_anime_profile_bio", bio.trim());
+      localStorage.setItem("ar_anime_profile_saved", "true");
+
+      setIsSaved(true);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Error saving profile to Firestore:", err);
+      setProfileError("Could not save profile. Check connection.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleSearchChange = (val: string) => {
     if (setSearch) {
@@ -108,6 +182,121 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
 
               {/* Drawer Links and Content */}
               <div className="flex-1 space-y-6">
+
+                {/* Custom Telegram Profile Card */}
+                <div className="bg-bg-darker border border-white/5 p-5 rounded-3xl space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-brand">Visitor Identity Portal</span>
+                    {isSaved && !isEditing && (
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="text-[9px] font-black text-white/40 hover:text-white uppercase tracking-widest flex items-center gap-1.5 transition-colors"
+                      >
+                        <Edit3 className="w-3 h-3 text-brand" /> Edit
+                      </button>
+                    )}
+                  </div>
+
+                  {!isSaved || isEditing ? (
+                    <form onSubmit={handleSaveProfile} className="space-y-3.5 select-text">
+                      <div>
+                        <label className="block text-[9px] font-black uppercase tracking-[0.15em] text-white/35 mb-1.5">Telegram Display Name *</label>
+                        <input
+                          type="text"
+                          required
+                          value={profileName}
+                          onChange={e => setProfileName(e.target.value)}
+                          placeholder="e.g. Vinit Kumar"
+                          className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs focus:border-brand/40 outline-none transition-all text-white placeholder:text-white/10"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[9px] font-black uppercase tracking-[0.15em] text-white/35 mb-1.5">Telegram Username *</label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-white/35 font-bold">@</span>
+                          <input
+                            type="text"
+                            required
+                            value={telegram}
+                            onChange={e => setTelegram(e.target.value)}
+                            placeholder="username"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl pl-7 pr-3 py-2 text-xs focus:border-brand/40 outline-none transition-all text-white placeholder:text-white/10"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[9px] font-black uppercase tracking-[0.15em] text-white/35 mb-1.5">Favorite category or message bio</label>
+                        <textarea
+                          value={bio}
+                          onChange={e => setBio(e.target.value)}
+                          placeholder="e.g. I love Fantasy and Action anime!"
+                          rows={2}
+                          className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs focus:border-brand/40 outline-none resize-none transition-all text-white placeholder:text-white/10"
+                        />
+                      </div>
+
+                      {profileError && (
+                        <p className="text-[10px] text-red-400 font-bold tracking-tight">{profileError}</p>
+                      )}
+
+                      <div className="flex gap-2 pt-1.5">
+                        {isSaved && (
+                          <button
+                            type="button"
+                            onClick={() => { setIsEditing(false); setProfileError(""); }}
+                            className="flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-white/5 border border-white/5 text-white/40 hover:bg-white/10 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                        <button
+                          type="submit"
+                          disabled={isSaving}
+                          className="flex-1 bg-brand hover:bg-brand-dark hover:scale-[1.01] active:scale-95 disabled:opacity-50 text-white py-2 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-md shadow-brand/10"
+                        >
+                          {isSaving ? (
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <UserCheck className="w-3.5 h-3.5" />
+                          )}
+                          <span>Save Tele-Profile</span>
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="bg-black/35 rounded-2xl p-4 border border-white/5 space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 bg-brand/10 border border-brand/20 rounded-xl flex items-center justify-center font-black text-brand text-xs">
+                          {profileName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-xs font-black text-white truncate">{profileName}</h4>
+                          <a
+                            href={`https://t.me/${telegram}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[11px] text-brand font-bold hover:underline truncate block mt-0.5"
+                          >
+                            @{telegram}
+                          </a>
+                        </div>
+                      </div>
+
+                      {bio && (
+                        <p className="text-[11px] text-white/50 leading-relaxed bg-bg-darker/50 p-2.5 rounded-xl border border-white/5">
+                          {bio}
+                        </p>
+                      )}
+
+                      <div className="flex items-center gap-1.5 text-[9px] text-emerald-400 font-black uppercase tracking-widest bg-emerald-500/5 border border-emerald-500/10 rounded-xl py-1.5 justify-center">
+                        <UserCheck className="w-3.5 h-3.5" />
+                        <span>Profile Connected to Admin Hub</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 
                 {/* Brand description or badge */}
                 <div className="bg-bg-darker border border-white/5 p-4 rounded-2xl flex items-start gap-3">

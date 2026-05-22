@@ -15,6 +15,12 @@ interface Anime {
   rating?: number;
   isFeatured?: boolean;
   clicks: number;
+  videoType?: "redirect" | "video";
+  videoUrl1080?: string;
+  videoUrl720?: string;
+  videoUrl480?: string;
+  videoUrl360?: string;
+  videoAspect?: "horizontal" | "vertical";
 }
 
 export default function AnimeGrid({ search = "", category = "All", sortBy = "latest" }: { search?: string, category?: string, sortBy?: "latest" | "trending" }) {
@@ -43,9 +49,14 @@ export default function AnimeGrid({ search = "", category = "All", sortBy = "lat
     return 0; // retain natural firestore order (newest created first)
   });
 
-  const handleLinkClick = async (id: string, link: string) => {
+  const handleLinkClick = async (item: Anime) => {
+    if (item.videoType === "video") {
+      window.dispatchEvent(new CustomEvent("ar_play_video", { detail: item }));
+      return;
+    }
+
     try {
-      const animeDocRef = doc(db, "anime", id);
+      const animeDocRef = doc(db, "anime", item.id);
       const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
       const statDocRef = doc(db, "stats", todayStr);
 
@@ -58,10 +69,14 @@ export default function AnimeGrid({ search = "", category = "All", sortBy = "lat
           totalClicks: increment(1)
         }, { merge: true })
       ]);
+      if (item.link) {
+        window.open(item.link, '_blank');
+      }
     } catch (e) {
       console.error("Click logging error:", e);
-    } finally {
-      window.open(link, '_blank');
+      if (item.link) {
+        window.open(item.link, '_blank');
+      }
     }
   };
 
@@ -89,7 +104,7 @@ export default function AnimeGrid({ search = "", category = "All", sortBy = "lat
               ease: [0.23, 1, 0.32, 1] 
             }}
           >
-            <AnimeCard anime={item} onClick={() => handleLinkClick(item.id, item.link)} />
+            <AnimeCard anime={item} onClick={() => handleLinkClick(item)} />
           </motion.div>
         ))}
       </AnimatePresence>

@@ -4,15 +4,17 @@ import Home from "./pages/Home";
 import Admin from "./pages/Admin";
 import Navbar from "./components/Navbar";
 import AgeGate from "./components/AgeGate";
-import { doc, onSnapshot } from "firebase/firestore";
+import VideoPlayerModal from "./components/VideoPlayerModal";
+import { doc, onSnapshot, updateDoc, increment, setDoc } from "firebase/firestore";
 import { db } from "./lib/firebase";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { Wrench, ShieldAlert, ArrowRight } from "lucide-react";
 
 export default function App() {
   const [search, setSearch] = useState("");
   const [isMaintenance, setIsMaintenance] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [activeVideo, setActiveVideo] = useState<any | null>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "config", "maintenance"), (snap) => {
@@ -26,6 +28,38 @@ export default function App() {
     });
     return () => unsub();
   }, []);
+
+  useEffect(() => {
+    const handlePlayRequest = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail) {
+        setActiveVideo(detail);
+      }
+    };
+    window.addEventListener("ar_play_video", handlePlayRequest);
+    return () => window.removeEventListener("ar_play_video", handlePlayRequest);
+  }, []);
+
+  const handlePlayTrackedFromInApp = async (id: string) => {
+    try {
+      const animeDocRef = doc(db, "anime", id);
+      const todayStr = new Date().toISOString().split('T')[0];
+      const statDocRef = doc(db, "stats", todayStr);
+
+      await Promise.all([
+        updateDoc(animeDocRef, {
+          clicks: increment(1)
+        }),
+        setDoc(statDocRef, {
+          date: todayStr,
+          totalClicks: increment(1)
+        }, { merge: true })
+      ]);
+      console.log("Play confirmed and total clicks successfully incremented.");
+    } catch (err) {
+      console.error("Failed to log play clicks:", err);
+    }
+  };
 
   const isAdminPath = window.location.pathname === "/admin";
 
@@ -110,6 +144,23 @@ export default function App() {
           </Routes>
         </main>
       </div>
+
+      <AnimatePresence>
+        {activeVideo && (
+          <VideoPlayerModal
+            title={activeVideo.title}
+            urls={{
+              videoUrl1080: activeVideo.videoUrl1080,
+              videoUrl720: activeVideo.videoUrl720,
+              videoUrl480: activeVideo.videoUrl480,
+              videoUrl360: activeVideo.videoUrl360,
+            }}
+            defaultAspect={activeVideo.videoAspect || 'horizontal'}
+            onClose={() => setActiveVideo(null)}
+            onPlayTracked={() => handlePlayTrackedFromInApp(activeVideo.id)}
+          />
+        )}
+      </AnimatePresence>
     </BrowserRouter>
   );
 }

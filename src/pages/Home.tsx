@@ -15,6 +15,12 @@ interface Anime {
   rating?: number;
   isFeatured?: boolean;
   clicks: number;
+  videoType?: "redirect" | "video";
+  videoUrl1080?: string;
+  videoUrl720?: string;
+  videoUrl480?: string;
+  videoUrl360?: string;
+  videoAspect?: "horizontal" | "vertical";
 }
 
 interface HomeProps {
@@ -39,15 +45,24 @@ export default function Home({ search = "", setSearch }: HomeProps) {
   const trendingAnime = [...allAnime].sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
   const topTrending = trendingAnime.slice(0, 15);
 
-  const handleLinkClick = async (id: string, link: string) => {
+  const handleLinkClick = async (item: Anime) => {
+    if (item.videoType === "video") {
+      window.dispatchEvent(new CustomEvent("ar_play_video", { detail: item }));
+      return;
+    }
+
     try {
-      await updateDoc(doc(db, "anime", id), {
+      await updateDoc(doc(db, "anime", item.id), {
         clicks: increment(1)
       });
-      window.open(link, '_blank');
+      if (item.link) {
+        window.open(item.link, '_blank');
+      }
     } catch (e) {
       console.error(e);
-      window.open(link, '_blank');
+      if (item.link) {
+        window.open(item.link, '_blank');
+      }
     }
   };
 
@@ -79,7 +94,7 @@ export default function Home({ search = "", setSearch }: HomeProps) {
               {topTrending.map((item, index) => (
                 <div
                   key={item.id}
-                  onClick={() => handleLinkClick(item.id, item.link)}
+                  onClick={() => handleLinkClick(item)}
                   className="w-48 sm:w-56 shrink-0 snap-start group relative aspect-[2/3] bg-bg-dark rounded-2xl overflow-hidden border border-white/5 hover:border-brand/50 shadow-xl transition-all duration-300 cursor-pointer focus:outline-none"
                 >
                   <img

@@ -20,7 +20,10 @@ import {
   ChevronRight, 
   Sparkles,
   RefreshCw,
-  Trophy
+  Trophy,
+  Users,
+  Tv,
+  ExternalLink
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -31,12 +34,14 @@ export default function Admin() {
   const [passcode, setPasscode] = useState("");
   const [passcodeError, setPasscodeError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<'stats' | 'anime' | 'banners'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'anime' | 'banners' | 'profiles'>('stats');
   const [anime, setAnime] = useState<any[]>([]);
   const [banners, setBanners] = useState<any[]>([]);
   const [dbStats, setDbStats] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<any[]>([]);
   const [timeframe, setTimeframe] = useState<7 | 14 | 30>(14);
   const [searchQuery, setSearchQuery] = useState("");
+  const [profileSearchQuery, setProfileSearchQuery] = useState("");
   const [maintenance, setMaintenance] = useState(false);
   const [isUpdatingMaintenance, setIsUpdatingMaintenance] = useState(false);
   
@@ -48,7 +53,13 @@ export default function Admin() {
     category: 'Action',
     keywords: '',
     rating: '8.5',
-    isFeatured: false
+    isFeatured: false,
+    videoType: 'redirect', // 'redirect' | 'video'
+    videoUrl1080: '',
+    videoUrl720: '',
+    videoUrl480: '',
+    videoUrl360: '',
+    videoAspect: 'horizontal' // 'horizontal' | 'vertical'
   });
   const [bannerForm, setBannerForm] = useState({ imageUrl: '', link: '', order: 0 });
 
@@ -81,11 +92,16 @@ export default function Admin() {
       }
     });
 
+    const unsubProfiles = onSnapshot(query(collection(db, "user_profiles"), orderBy("createdAt", "desc")), (snap) => {
+      setProfiles(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+
     return () => { 
       unsubAnime(); 
       unsubBanners(); 
       unsubStats();
       unsubMaintenance();
+      unsubProfiles();
     };
   }, [isAuthenticated]);
 
@@ -129,16 +145,22 @@ export default function Admin() {
 
   const handleAddAnime = async (e: FormEvent) => {
     e.preventDefault();
-    if (!animeForm.title || !animeForm.thumbnail || !animeForm.link) return;
+    if (!animeForm.title || !animeForm.thumbnail) return;
 
     await addDoc(collection(db, "anime"), { 
       title: animeForm.title,
       thumbnail: animeForm.thumbnail,
-      link: animeForm.link,
+      link: animeForm.link || '',
       category: animeForm.category,
       keywords: animeForm.keywords,
       rating: parseFloat(animeForm.rating) || 8.5,
       isFeatured: animeForm.isFeatured,
+      videoType: animeForm.videoType,
+      videoUrl1080: animeForm.videoUrl1080 || '',
+      videoUrl720: animeForm.videoUrl720 || '',
+      videoUrl480: animeForm.videoUrl480 || '',
+      videoUrl360: animeForm.videoUrl360 || '',
+      videoAspect: animeForm.videoAspect || 'horizontal',
       clicks: 0, 
       createdAt: serverTimestamp(), 
       isActive: true 
@@ -151,7 +173,13 @@ export default function Admin() {
       category: 'Action',
       keywords: '',
       rating: '8.5',
-      isFeatured: false
+      isFeatured: false,
+      videoType: 'redirect',
+      videoUrl1080: '',
+      videoUrl720: '',
+      videoUrl480: '',
+      videoUrl360: '',
+      videoAspect: 'horizontal'
     });
   };
 
@@ -359,6 +387,7 @@ export default function Admin() {
           <TabButton active={activeTab === 'stats'} onClick={() => setActiveTab('stats')} icon={<BarChart3 className="w-4 h-4" />} label="Stats" />
           <TabButton active={activeTab === 'anime'} onClick={() => setActiveTab('anime')} icon={<LayoutGrid className="w-4 h-4" />} label="Anime Database" />
           <TabButton active={activeTab === 'banners'} onClick={() => setActiveTab('banners')} icon={<ImageIcon className="w-4 h-4" />} label="Spotlight Banners" />
+          <TabButton active={activeTab === 'profiles'} onClick={() => setActiveTab('profiles')} icon={<Users className="w-4 h-4" />} label="Telegram Users" />
           
           <button 
             id="admin-signout-btn"
@@ -563,8 +592,7 @@ export default function Admin() {
               <form onSubmit={handleAddAnime} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Input label="Anime Title" value={animeForm.title} onChange={(v: string) => setAnimeForm({...animeForm, title: v})} required placeholder="e.g. Naruto Shippuden" />
                 <Input label="Landscape Thumbnail URL" value={animeForm.thumbnail} onChange={(v: string) => setAnimeForm({...animeForm, thumbnail: v})} required placeholder="URL to JPEG/PNG" />
-                <Input label="Target Redirect Link" value={animeForm.link} onChange={(v: string) => setAnimeForm({...animeForm, link: v})} required placeholder="Telegram channel or post link" />
-                
+
                 <div className="flex flex-col gap-2">
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-2">Main Category / Genre</label>
                   <select 
@@ -577,8 +605,72 @@ export default function Admin() {
                 </div>
 
                 <Input label="User Rating Score" type="number" step="0.1" min="1" max="10" value={animeForm.rating} onChange={(v: string) => setAnimeForm({...animeForm, rating: v})} placeholder="e.g. 8.9" />
-
                 <Input label="Search Keywords / Tags" value={animeForm.keywords} onChange={(v: string) => setAnimeForm({...animeForm, keywords: v})} placeholder="e.g. ninja, shonen, jutsu, battle" />
+
+                <div className="flex flex-col gap-2 md:col-span-1 lg:col-span-1 bg-bg-darker/40 p-2 rounded-2xl border border-white/5">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-brand ml-1">Playback Destination Mode</label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAnimeForm({...animeForm, videoType: 'redirect'})}
+                      className={`flex-1 py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                        animeForm.videoType === 'redirect' ? 'bg-brand/20 border border-brand text-brand' : 'bg-bg-dark border border-white/5 text-white/40 hover:text-white'
+                      }`}
+                    >
+                      Redirect Link
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAnimeForm({...animeForm, videoType: 'video'})}
+                      className={`flex-1 py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                        animeForm.videoType === 'video' ? 'bg-brand/20 border border-brand text-brand' : 'bg-bg-dark border border-white/5 text-white/40 hover:text-white'
+                      }`}
+                    >
+                      In-App Player
+                    </button>
+                  </div>
+                </div>
+
+                {animeForm.videoType === 'redirect' ? (
+                  <div className="md:col-span-2 lg:col-span-3">
+                    <Input label="Target Redirect Link" value={animeForm.link} onChange={(v: string) => setAnimeForm({...animeForm, link: v})} required placeholder="Telegram channel or post link" />
+                  </div>
+                ) : (
+                  <div className="md:col-span-2 lg:col-span-3 border border-brand/10 bg-brand/5 p-5 rounded-3xl space-y-4">
+                    <div className="flex items-center justify-between gap-4 mb-2">
+                      <span className="text-[10px] font-black text-brand uppercase tracking-wider">Video Quality Resolution Configuration</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] text-white/45 font-bold uppercase">Screen Layout:</span>
+                        <div className="flex gap-1.5 bg-bg-darker/60 p-1 rounded-xl">
+                          <button
+                            type="button"
+                            onClick={() => setAnimeForm({...animeForm, videoAspect: 'horizontal'})}
+                            className={`px-3 py-1 text-[9px] font-black uppercase rounded-lg transition-colors ${
+                              animeForm.videoAspect === 'horizontal' ? 'bg-brand text-white' : 'text-white/40 hover:text-white'
+                            }`}
+                          >
+                            Horizontal (16:9)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAnimeForm({...animeForm, videoAspect: 'vertical'})}
+                            className={`px-3 py-1 text-[9px] font-black uppercase rounded-lg transition-colors ${
+                              animeForm.videoAspect === 'vertical' ? 'bg-brand text-white' : 'text-white/40 hover:text-white'
+                            }`}
+                          >
+                            Vertical (9:16)
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Input label="Video Main Direct Link (1080p / Source URL)" value={animeForm.videoUrl1080} onChange={(v: string) => setAnimeForm({...animeForm, videoUrl1080: v})} required placeholder="HTTPS link to direct video MP4 (1080p source)" />
+                      <Input label="Video Medium Quality Link (720p)" value={animeForm.videoUrl720} onChange={(v: string) => setAnimeForm({...animeForm, videoUrl720: v})} placeholder="HTTPS link to direct video MP4 (720p)" />
+                      <Input label="Video Low Quality Link (480p)" value={animeForm.videoUrl480} onChange={(v: string) => setAnimeForm({...animeForm, videoUrl480: v})} placeholder="HTTPS link to direct video MP4 (480p)" />
+                      <Input label="Video Mobile Quality Link (360p)" value={animeForm.videoUrl360} onChange={(v: string) => setAnimeForm({...animeForm, videoUrl360: v})} placeholder="HTTPS link to direct video MP4 (360p)" />
+                    </div>
+                  </div>
+                )}
 
                 <div className="md:col-span-2 lg:col-span-3 flex items-center justify-between bg-bg-darker/60 border border-white/5 p-4 rounded-2xl">
                   <div className="flex flex-col gap-1">
@@ -632,7 +724,23 @@ export default function Admin() {
                     
                     <div className="flex-1 min-w-0">
                       <h3 className="font-extrabold truncate text-sm text-white">{item.title}</h3>
-                      <p className="text-[10px] text-white/30 truncate mt-0.5">{item.link}</p>
+                      {item.videoType === 'video' ? (
+                        <div className="flex flex-col mt-0.5 mb-1">
+                          <span className="text-[9px] text-brand uppercase font-black tracking-wider flex items-center gap-1">
+                            <Tv className="w-3 h-3" /> In-App Player ({item.videoAspect || 'horizontal'})
+                          </span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {item.videoUrl1080 && <span className="text-[8px] border border-white/5 bg-white/5 text-white/40 px-1.5 py-0.5 rounded font-mono font-bold">1080p</span>}
+                            {item.videoUrl720 && <span className="text-[8px] border border-white/5 bg-white/5 text-white/40 px-1.5 py-0.5 rounded font-mono font-bold">720p</span>}
+                            {item.videoUrl480 && <span className="text-[8px] border border-white/5 bg-white/5 text-white/40 px-1.5 py-0.5 rounded font-mono font-bold">480p</span>}
+                            {item.videoUrl360 && <span className="text-[8px] border border-white/5 bg-white/5 text-white/40 px-1.5 py-0.5 rounded font-mono font-bold">360p</span>}
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-white/30 truncate mt-0.5 flex items-center gap-1">
+                          <ExternalLink className="w-3 h-3 text-cyan-400" /> {item.link || 'No url redirect link configured'}
+                        </p>
+                      )}
                       
                       <div className="flex flex-wrap items-center gap-1.5 mt-2">
                         <span className="text-[9px] bg-brand/10 text-brand px-2 py-0.5 rounded font-black tracking-widest uppercase">
@@ -721,6 +829,77 @@ export default function Admin() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'profiles' && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold italic uppercase tracking-tight text-white flex items-center gap-2">
+                  <Users className="w-5 h-5 text-brand" /> Registered Visitor Directory
+                </h2>
+                <p className="text-xs text-white/40 mt-1">Submitted directly by visitors via the navigation drawer</p>
+              </div>
+              <div className="relative max-w-sm w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
+                <input 
+                  type="text" 
+                  placeholder="Search telegram names / usernames..." 
+                  value={profileSearchQuery}
+                  onChange={e => setProfileSearchQuery(e.target.value)}
+                  className="w-full bg-bg-dark border border-white/10 rounded-xl py-2.5 pl-9 pr-4 text-xs focus:border-brand/40 outline-none transition-all placeholder:text-white/15"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {profiles.filter(p => !profileSearchQuery || p.name?.toLowerCase().includes(profileSearchQuery.toLowerCase()) || p.telegram?.toLowerCase().includes(profileSearchQuery.toLowerCase())).map(p => (
+                <div key={p.id} className="bg-bg-dark border border-white/5 hover:border-white/10 p-5 rounded-3xl relative overflow-hidden group transition-all">
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-bl-[2.5rem]" />
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center font-black text-brand text-sm shrink-0">
+                      {(p.name || 'U').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-black text-white truncate">{p.name || "Anonymous User"}</h4>
+                      <p className="text-xs text-brand font-bold mt-0.5">
+                        <a href={p.telegram ? (p.telegram.startsWith('@') ? `https://t.me/${p.telegram.substring(1)}` : `https://t.me/${p.telegram}`) : '#'} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-1">
+                          {p.telegram ? (p.telegram.startsWith('@') ? p.telegram : `@${p.telegram}`) : '@username'}
+                        </a>
+                      </p>
+                    </div>
+                    {/* Delete profile */}
+                    <button 
+                      onClick={() => handleDelete('user_profiles', p.id)} 
+                      className="p-2.5 bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white rounded-xl transition-all ml-auto shrink-0"
+                      title="Remove profile entry"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {p.bio && (
+                    <p className="text-xs text-white/55 mt-4 leading-relaxed bg-bg-darker/50 p-3 rounded-2xl border border-white/5">
+                      {p.bio}
+                    </p>
+                  )}
+
+                  <div className="flex items-center justify-between border-t border-white/5 mt-4 pt-3 text-[10px] text-white/30 font-mono">
+                    <span>RECORD_ID: {p.id.substring(0, 6)}...</span>
+                    <span>{p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'Today'}</span>
+                  </div>
+                </div>
+              ))}
+
+              {profiles.length === 0 && (
+                <div className="col-span-full py-20 text-center bg-bg-dark border border-white/5 rounded-3xl text-white/20">
+                  <Users className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                  <p className="font-bold">No user profiles submitted yet.</p>
+                  <p className="text-xs mt-1">When users configure their Telegram info in the sidebar menu, they will register here.</p>
+                </div>
+              )}
             </div>
           </div>
         )}

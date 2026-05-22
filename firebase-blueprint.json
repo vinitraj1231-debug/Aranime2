@@ -59,6 +59,19 @@
         "enabled": { "type": "boolean", "description": "Whether maintenance mode is active" },
         "updatedAt": { "type": "string", "format": "date-time", "description": "When config was last altered" }
       }
+    },
+    "user_profiles": {
+      "title": "User Profiles",
+      "description": "Telegram user profiles submitted by visitors.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "telegram": { "type": "string" },
+        "bio": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date" }
+      },
+      "required": ["name", "telegram"]
     }
   },
   "firestore": {
@@ -81,6 +94,10 @@
     "config": {
       "schema": "config",
       "description": "Global system configurations."
+    },
+    "user_profiles": {
+      "schema": "user_profiles",
+      "description": "Stored user Telegram profiles."
     }
   }
 }
