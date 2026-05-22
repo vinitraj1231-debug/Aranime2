@@ -174,13 +174,13 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
           </Link>
 
           {/* Header Search Bar */}
-          <div className="relative group max-w-[200px] xs:max-w-[280px] sm:max-w-xs md:max-w-sm w-full mx-auto px-1 sm:px-4">
+          <div className="relative group max-w-[140px] xs:max-w-[180px] sm:max-w-xs md:max-w-sm w-full mr-auto ml-2 px-1 sm:px-2">
             <div className="absolute -inset-0.5 bg-brand/15 rounded-full blur opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
-            <Search className="absolute left-4 sm:left-7 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30 group-focus-within:text-brand transition-colors" />
+            <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 w-3 h-3 text-white/30 group-focus-within:text-brand transition-colors" />
             <input 
               id="header-search-bar"
               type="text" 
-              placeholder="Search index..." 
+              placeholder="Search..."
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
@@ -190,7 +190,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
                   saveSearchQuery(search);
                 }
               }}
-              className="relative w-full bg-black/40 backdrop-blur-md border border-white/5 focus:border-brand/40 outline-none rounded-full py-2 pl-9 sm:pl-11 pr-4 text-xs transition-all placeholder:text-white/20 text-white shadow-inner"
+              className="relative w-full bg-black/40 backdrop-blur-md border border-white/5 focus:border-brand/40 outline-none rounded-full py-1.5 pl-8 sm:pl-10 pr-4 text-[10px] sm:text-xs text-center transition-all placeholder:text-white/20 text-white shadow-inner font-bold tracking-wide"
             />
 
             {/* Recent Searches Dropdown Panel */}

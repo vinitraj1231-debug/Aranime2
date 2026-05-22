@@ -103,44 +103,45 @@ export default function Home({ search = "", setSearch }: HomeProps) {
                 <div
                   key={item.id}
                   onClick={() => handleLinkClick(item)}
-                  className="w-60 sm:w-72 shrink-0 snap-start group relative aspect-[16/10] bg-bg-dark rounded-xl sm:rounded-[1.25rem] overflow-hidden border border-white/[0.08] hover:border-brand/50 shadow-2xl transition-all duration-500 ease-out cursor-pointer focus:outline-none"
+                  className="w-72 sm:w-80 shrink-0 snap-start group relative aspect-[16/10] bg-bg-dark rounded-[2.5rem] overflow-hidden border border-white/[0.08] hover:border-brand/50 shadow-2xl transition-all duration-700 ease-out cursor-pointer focus:outline-none"
                 >
                   <img
                     src={item.thumbnail}
                     alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     loading="lazy"
                   />
                   
                   {/* Glass Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-95 flex flex-col justify-end p-3 sm:p-4" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-95 flex flex-col justify-end p-4 sm:p-5" />
 
                   {/* Rank Badge */}
-                  <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-brand rounded-md text-[7px] font-black text-white uppercase tracking-wider border border-white/10 flex items-center gap-0.5 shadow-lg">
+                  <div className="absolute top-4 left-4 px-3 py-1 bg-brand rounded-full text-[9px] font-black text-white uppercase tracking-wider border border-white/10 flex items-center gap-1.5 shadow-xl">
+                    <Sparkles className="w-3 h-3" />
                     <span>Rank #{index + 1}</span>
                   </div>
 
                   {/* View counter */}
-                  <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/85 backdrop-blur-md rounded-md text-[7px] font-bold text-white/70 border border-white/5 uppercase tracking-wide flex items-center gap-0.5">
-                    <div className="w-1 h-1 bg-brand rounded-full animate-pulse" />
+                  <div className="absolute top-4 right-4 px-3 py-1 bg-black/85 backdrop-blur-md rounded-full text-[9px] font-bold text-white/70 border border-white/5 uppercase tracking-wide flex items-center gap-1.5 shadow-xl">
+                    <div className="w-1.5 h-1.5 bg-brand rounded-full animate-pulse" />
                     <span>{item.clicks.toLocaleString()} VIEWS</span>
                   </div>
 
                   {/* Play Action button display on hover */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="w-9 h-9 bg-brand rounded-full flex items-center justify-center shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform">
-                      <Play strokeWidth={1.2} className="text-white fill-current w-4 h-4 ml-0.5" />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <div className="w-12 h-12 bg-brand rounded-full flex items-center justify-center shadow-2xl shadow-brand/40 transform scale-75 group-hover:scale-100 transition-all duration-500">
+                      <Play strokeWidth={1.2} className="text-white fill-current w-6 h-6 ml-1" />
                     </div>
                   </div>
 
                   {/* Title and details bottom text */}
-                  <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-3 shrink-0 pointer-events-none">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 shrink-0 pointer-events-none">
                     {item.category && (
-                      <span className="text-[7px] font-black tracking-[0.2em] text-brand uppercase mb-0.5 block">
+                      <span className="text-[8px] font-black tracking-[0.25em] text-brand uppercase mb-1 block">
                         {item.category}
                       </span>
                     )}
-                    <h3 className="font-extrabold text-[10px] sm:text-[11px] text-white/95 line-clamp-1 leading-tight tracking-tight group-hover:text-brand transition-colors">
+                    <h3 className="font-black text-[12px] sm:text-[14px] text-white leading-tight tracking-tight group-hover:text-brand transition-colors uppercase italic line-clamp-1">
                       {item.title}
                     </h3>
                   </div>
@@ -152,15 +153,15 @@ export default function Home({ search = "", setSearch }: HomeProps) {
 
         {/* Modern Categories Bar */}
         <div className="relative pt-4">
-          <div className="flex items-center gap-3 overflow-x-auto pb-4 custom-scrollbar scroll-smooth no-scrollbar">
+          <div className="flex items-center gap-4 overflow-x-auto pb-6 custom-scrollbar scroll-smooth no-scrollbar">
             {categories.map(cat => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-7 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-[0.15em] whitespace-nowrap transition-all border shadow-sm ${
+                className={`px-8 py-3 rounded-full text-[12px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all border-2 shadow-lg ${
                   selectedCategory === cat 
-                  ? 'bg-brand border-brand text-white shadow-brand/40 scale-105' 
-                  : 'bg-bg-dark/40 backdrop-blur-md border-white/5 text-white/30 hover:text-white hover:bg-white/10'
+                  ? 'bg-brand border-brand text-white shadow-brand/40 scale-110'
+                  : 'bg-bg-dark/60 backdrop-blur-xl border-white/5 text-white/40 hover:text-white hover:bg-white/10 hover:border-white/10'
                 }`}
               >
                 {cat}
@@ -168,17 +169,18 @@ export default function Home({ search = "", setSearch }: HomeProps) {
             ))}
           </div>
           {/* Subtle Fade Indicators */}
-          <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-bg-darker to-transparent pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-6 w-16 bg-gradient-to-l from-bg-darker to-transparent pointer-events-none" />
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-2">
-          <div className="space-y-1">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-8 bg-brand rounded-full shadow-[0_0_15px_rgba(244,117,33,0.5)]" />
-              <h2 className="text-3xl font-black uppercase tracking-tighter italic text-white/95">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-4">
+              <div className="w-2 h-10 bg-brand rounded-full shadow-[0_0_25px_rgba(244,117,33,0.7)] animate-pulse" />
+              <h2 className="text-4xl font-black uppercase tracking-tighter italic text-white leading-none">
                 {selectedCategory === "All" ? "Premium Video" : `${selectedCategory} Collection`}
               </h2>
             </div>
+            <p className="text-[10px] text-white/20 uppercase tracking-[0.4em] font-bold ml-6">High Definition Digital Streaming</p>
           </div>
         </div>
         
