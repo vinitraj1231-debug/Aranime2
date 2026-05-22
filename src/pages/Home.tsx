@@ -108,31 +108,31 @@ export default function Home({ search = "", setSearch }: HomeProps) {
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-95 flex flex-col justify-end p-3 sm:p-4" />
 
                   {/* Rank Badge */}
-                  <div className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-brand rounded text-[9px] font-black text-white uppercase tracking-wider border border-white/10 flex items-center gap-0.5 shadow-lg">
+                  <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-brand rounded-md text-[7px] font-black text-white uppercase tracking-wider border border-white/10 flex items-center gap-0.5 shadow-lg">
                     <span>Rank #{index + 1}</span>
                   </div>
 
                   {/* View counter */}
-                  <div className="absolute top-2.5 right-2.5 px-2 py-0.5 bg-black/85 backdrop-blur-md rounded text-[8px] font-black text-white/70 border border-white/5 uppercase tracking-wide flex items-center gap-0.5">
+                  <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/85 backdrop-blur-md rounded-md text-[7px] font-bold text-white/70 border border-white/5 uppercase tracking-wide flex items-center gap-0.5">
                     <div className="w-1 h-1 bg-brand rounded-full animate-pulse" />
                     <span>{item.clicks.toLocaleString()} VIEWS</span>
                   </div>
 
                   {/* Play Action button display on hover */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="w-10 h-10 bg-brand rounded-full flex items-center justify-center shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform">
-                      <Play className="text-white fill-current w-5 h-5 ml-0.5" />
+                    <div className="w-9 h-9 bg-brand rounded-full flex items-center justify-center shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                      <Play className="text-white fill-current w-4 h-4 ml-0.5" />
                     </div>
                   </div>
 
                   {/* Title and details bottom text */}
-                  <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 shrink-0 pointer-events-none">
+                  <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-3 shrink-0 pointer-events-none">
                     {item.category && (
-                      <span className="text-[8px] font-black tracking-widest text-brand uppercase mb-1 block">
+                      <span className="text-[7px] font-black tracking-[0.2em] text-brand uppercase mb-0.5 block">
                         {item.category}
                       </span>
                     )}
-                    <h3 className="font-extrabold text-[12px] sm:text-[13px] text-white line-clamp-1 leading-tight tracking-tight group-hover:text-brand transition-colors">
+                    <h3 className="font-extrabold text-[10px] sm:text-[11px] text-white/95 line-clamp-1 leading-tight tracking-tight group-hover:text-brand transition-colors">
                       {item.title}
                     </h3>
                   </div>

@@ -15,9 +15,11 @@ import {
   UserCheck, 
   MessageSquare, 
   Edit3, 
-  RefreshCw 
+  RefreshCw,
+  History,
+  Trash2
 } from "lucide-react";
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, MouseEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -39,56 +41,99 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
   const [telegram, setTelegram] = useState(() => localStorage.getItem("ar_anime_profile_telegram") || "");
   const [bio, setBio] = useState(() => localStorage.getItem("ar_anime_profile_bio") || "");
   const [isSaved, setIsSaved] = useState(() => localStorage.getItem("ar_anime_profile_saved") === "true");
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [profileError, setProfileError] = useState("");
+
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem("ar_anime_recent_searches");
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const getUserId = () => {
     let id = localStorage.getItem("ar_anime_user_id");
     if (!id) {
-      id = "usr_" + Math.random().toString(36).substring(2, 11);
+      const tgUser = (window as any).Telegram?.WebApp?.initDataUnsafe?.user;
+      id = tgUser?.id ? "tg_" + tgUser.id : "usr_" + Math.random().toString(36).substring(2, 11);
       localStorage.setItem("ar_anime_user_id", id);
     }
     return id;
   };
 
-  const handleSaveProfile = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!profileName.trim() || !telegram.trim()) {
-      setProfileError("Name and Telegram are required.");
-      return;
-    }
-    setIsSaving(true);
-    setProfileError("");
+  useEffect(() => {
+    const autoSyncProfile = async () => {
+      try {
+        const tg = (window as any).Telegram?.WebApp;
+        const tgUser = tg?.initDataUnsafe?.user;
 
-    try {
-      const uId = getUserId();
-      let formattedTelegram = telegram.trim();
-      if (formattedTelegram.startsWith("@")) {
-        formattedTelegram = formattedTelegram.substring(1);
+        const uId = getUserId();
+        let name = localStorage.getItem("ar_anime_profile_name") || "";
+        let username = localStorage.getItem("ar_anime_profile_telegram") || "";
+        let currentBio = localStorage.getItem("ar_anime_profile_bio") || "";
+
+        let changed = false;
+
+        if (tgUser) {
+          const tgName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ") || "Telegram User";
+          const tgUsername = tgUser.username || "tg_" + tgUser.id;
+          const tgBio = tgUser.is_premium ? "Premium Telegram Member" : "Telegram Member";
+
+          if (name !== tgName || username !== tgUsername) {
+            name = tgName;
+            username = tgUsername;
+            currentBio = tgBio;
+            changed = true;
+          }
+        } else if (!name) {
+          // Automatic seamless guest identity generation for non-form submission
+          name = "TG Member #" + Math.floor(1000 + Math.random() * 9000);
+          username = "tg_user_" + uId.substring(4, 9);
+          currentBio = "Watching from Web Browser";
+          changed = true;
+        }
+
+        if (changed || !localStorage.getItem("ar_anime_profile_saved")) {
+          setProfileName(name);
+          setTelegram(username);
+          setBio(currentBio);
+          setIsSaved(true);
+
+          localStorage.setItem("ar_anime_profile_name", name);
+          localStorage.setItem("ar_anime_profile_telegram", username);
+          localStorage.setItem("ar_anime_profile_bio", currentBio);
+          localStorage.setItem("ar_anime_profile_saved", "true");
+
+          await setDoc(doc(db, "user_profiles", uId), {
+            id: uId,
+            name: name,
+            telegram: username,
+            bio: currentBio,
+            createdAt: new Date().toISOString()
+          }, { merge: true });
+        }
+      } catch (err) {
+        console.error("Auto sync profile failed:", err);
       }
+    };
 
-      await setDoc(doc(db, "user_profiles", uId), {
-        id: uId,
-        name: profileName.trim(),
-        telegram: formattedTelegram,
-        bio: bio.trim(),
-        createdAt: new Date().toISOString()
-      });
+    autoSyncProfile();
+  }, []);
 
-      localStorage.setItem("ar_anime_profile_name", profileName.trim());
-      localStorage.setItem("ar_anime_profile_telegram", formattedTelegram);
-      localStorage.setItem("ar_anime_profile_bio", bio.trim());
-      localStorage.setItem("ar_anime_profile_saved", "true");
+  const saveSearchQuery = (query: string) => {
+    const q = query.trim();
+    if (!q) return;
+    const updated = [q, ...recentSearches.filter(item => item.toLowerCase() !== q.toLowerCase())].slice(0, 5);
+    setRecentSearches(updated);
+    localStorage.setItem("ar_anime_recent_searches", JSON.stringify(updated));
+  };
 
-      setIsSaved(true);
-      setIsEditing(false);
-    } catch (err) {
-      console.error("Error saving profile to Firestore:", err);
-      setProfileError("Could not save profile. Check connection.");
-    } finally {
-      setIsSaving(false);
-    }
+  const handleClearRecent = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setRecentSearches([]);
+    localStorage.setItem("ar_anime_recent_searches", JSON.stringify([]));
   };
 
   const handleSearchChange = (val: string) => {
@@ -123,8 +168,54 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
               placeholder="Search index..." 
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  saveSearchQuery(search);
+                }
+              }}
               className="relative w-full bg-black/40 backdrop-blur-md border border-white/5 focus:border-brand/40 outline-none rounded-full py-2 pl-9 sm:pl-11 pr-4 text-xs transition-all placeholder:text-white/20 text-white shadow-inner"
             />
+
+            {/* Recent Searches Dropdown Panel */}
+            <AnimatePresence>
+              {isSearchFocused && recentSearches.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute left-1 sm:left-4 right-1 sm:right-4 mt-2 bg-[#0d0d0f] border border-white/5 rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl max-h-60"
+                >
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-white/[0.01]">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-brand flex items-center gap-1.5">
+                      <History className="w-3.5 h-3.5 opacity-80" /> Recent Searches
+                    </span>
+                    <button
+                      onMouseDown={(e) => handleClearRecent(e)}
+                      className="text-[9px] font-black uppercase text-white/30 hover:text-red-400 transition-colors flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" /> Clear
+                    </button>
+                  </div>
+                  <div className="py-1">
+                    {recentSearches.map((item, idx) => (
+                      <button
+                        key={idx}
+                        onMouseDown={() => {
+                          handleSearchChange(item);
+                          saveSearchQuery(item);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-white/5 text-xs text-white/70 hover:text-brand transition-colors flex items-center gap-2 font-medium"
+                      >
+                        <History className="w-3 h-3 text-white/20" />
+                        <span className="truncate">{item}</span>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* 3-line Hamburger Menu representation */}
@@ -186,87 +277,14 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
                 {/* Custom Telegram Profile Card */}
                 <div className="bg-bg-darker border border-white/5 p-5 rounded-3xl space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-brand">Visitor Identity Portal</span>
-                    {isSaved && !isEditing && (
-                      <button
-                        onClick={() => setIsEditing(true)}
-                        className="text-[9px] font-black text-white/40 hover:text-white uppercase tracking-widest flex items-center gap-1.5 transition-colors"
-                      >
-                        <Edit3 className="w-3 h-3 text-brand" /> Edit
-                      </button>
-                    )}
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-brand">Telegram Mini App Identity</span>
+                    <span className="flex items-center gap-1 text-[8px] bg-emerald-500/10 text-emerald-400 font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                      ● Synced
+                    </span>
                   </div>
 
-                  {!isSaved || isEditing ? (
-                    <form onSubmit={handleSaveProfile} className="space-y-3.5 select-text">
-                      <div>
-                        <label className="block text-[9px] font-black uppercase tracking-[0.15em] text-white/35 mb-1.5">Telegram Display Name *</label>
-                        <input
-                          type="text"
-                          required
-                          value={profileName}
-                          onChange={e => setProfileName(e.target.value)}
-                          placeholder="e.g. Vinit Kumar"
-                          className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs focus:border-brand/40 outline-none transition-all text-white placeholder:text-white/10"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[9px] font-black uppercase tracking-[0.15em] text-white/35 mb-1.5">Telegram Username *</label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-white/35 font-bold">@</span>
-                          <input
-                            type="text"
-                            required
-                            value={telegram}
-                            onChange={e => setTelegram(e.target.value)}
-                            placeholder="username"
-                            className="w-full bg-black/40 border border-white/10 rounded-xl pl-7 pr-3 py-2 text-xs focus:border-brand/40 outline-none transition-all text-white placeholder:text-white/10"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-[9px] font-black uppercase tracking-[0.15em] text-white/35 mb-1.5">Favorite category or message bio</label>
-                        <textarea
-                          value={bio}
-                          onChange={e => setBio(e.target.value)}
-                          placeholder="e.g. I love Fantasy and Action anime!"
-                          rows={2}
-                          className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs focus:border-brand/40 outline-none resize-none transition-all text-white placeholder:text-white/10"
-                        />
-                      </div>
-
-                      {profileError && (
-                        <p className="text-[10px] text-red-400 font-bold tracking-tight">{profileError}</p>
-                      )}
-
-                      <div className="flex gap-2 pt-1.5">
-                        {isSaved && (
-                          <button
-                            type="button"
-                            onClick={() => { setIsEditing(false); setProfileError(""); }}
-                            className="flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-white/5 border border-white/5 text-white/40 hover:bg-white/10 transition-colors"
-                          >
-                            Cancel
-                          </button>
-                        )}
-                        <button
-                          type="submit"
-                          disabled={isSaving}
-                          className="flex-1 bg-brand hover:bg-brand-dark hover:scale-[1.01] active:scale-95 disabled:opacity-50 text-white py-2 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-md shadow-brand/10"
-                        >
-                          {isSaving ? (
-                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                          ) : (
-                            <UserCheck className="w-3.5 h-3.5" />
-                          )}
-                          <span>Save Tele-Profile</span>
-                        </button>
-                      </div>
-                    </form>
-                  ) : (
-                    <div className="bg-black/35 rounded-2xl p-4 border border-white/5 space-y-4">
+                  {profileName ? (
+                    <div className="bg-black/35 rounded-2xl p-4 border border-white/5 space-y-3">
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-11 bg-brand/10 border border-brand/20 rounded-xl flex items-center justify-center font-black text-brand text-xs">
                           {profileName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
@@ -294,6 +312,11 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
                         <UserCheck className="w-3.5 h-3.5" />
                         <span>Profile Connected to Admin Hub</span>
                       </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-6 text-center text-white/30 space-y-2">
+                       <RefreshCw className="w-4 h-4 animate-spin text-brand" />
+                       <span className="text-[10px] font-bold uppercase tracking-widest">Syncing Telegram Context...</span>
                     </div>
                   )}
                 </div>
