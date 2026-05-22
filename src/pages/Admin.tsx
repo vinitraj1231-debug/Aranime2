@@ -50,7 +50,7 @@ export default function Admin() {
     title: '', 
     thumbnail: '', 
     link: '', 
-    category: 'Action',
+    category: 'Indian',
     keywords: '',
     rating: '8.5',
     isFeatured: false,
@@ -63,7 +63,7 @@ export default function Admin() {
   });
   const [bannerForm, setBannerForm] = useState({ imageUrl: '', link: '', order: 0 });
 
-  const categories = ["Action", "Comedy", "Drama", "Fantasy", "Romance", "Sci-Fi", "Slice of Life", "Adventure", "Supernatural"];
+  const categories = ["Indian", "Western", "Russian", "Japnese", "Asian", "Hentai", "Leak/mss"];
 
   useEffect(() => {
     // Check local storage for session auth
@@ -170,7 +170,7 @@ export default function Admin() {
       title: '', 
       thumbnail: '', 
       link: '', 
-      category: 'Action',
+      category: 'Indian',
       keywords: '',
       rating: '8.5',
       isFeatured: false,

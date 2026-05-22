@@ -32,7 +32,7 @@ export default function Home({ search = "", setSearch }: HomeProps) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [allAnime, setAllAnime] = useState<Anime[]>([]);
 
-  const categories = ["All", "Action", "Comedy", "Drama", "Fantasy", "Romance", "Sci-Fi", "Slice of Life", "Adventure", "Supernatural"];
+  const categories = ["All", "Indian", "Western", "Russian", "Japnese", "Asian", "Hentai", "Leak/mss"];
 
   useEffect(() => {
     // Refreshing lists triggered by state transitions gets simulated fast-progress bar integration
@@ -89,7 +89,7 @@ export default function Home({ search = "", setSearch }: HomeProps) {
               <div className="flex items-center gap-2">
                 <Flame strokeWidth={1.2} className="w-5 h-5 text-brand animate-bounce" />
                 <h2 className="text-xl font-bold uppercase tracking-tight italic text-white">
-                  Trending Updates
+                  Trending
                 </h2>
               </div>
             </div>
@@ -176,10 +176,9 @@ export default function Home({ search = "", setSearch }: HomeProps) {
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-8 bg-brand rounded-full shadow-[0_0_15px_rgba(244,117,33,0.5)]" />
               <h2 className="text-3xl font-black uppercase tracking-tighter italic text-white/95">
-                {selectedCategory === "All" ? "Premium Series" : `${selectedCategory} Collection`}
+                {selectedCategory === "All" ? "Premium Video" : `${selectedCategory} Collection`}
               </h2>
             </div>
-            <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.2em] ml-5">Exploration / Database / v2.0</p>
           </div>
         </div>
         

@@ -60,7 +60,7 @@ export default function AnimeCard({ anime, onClick }: AnimeCardProps) {
         </h3>
         <div className="flex items-center gap-2 mt-1">
            <span className="text-[10px] sm:text-[10px] text-white/50 font-black uppercase tracking-widest px-2 py-0.5 border border-white/10 rounded-lg bg-white/[0.03] italic">4K UHD</span>
-           <span className="text-[10px] sm:text-[10px] text-brand font-black uppercase tracking-widest">Premium Sub | Dub</span>
+           <span className="text-[10px] sm:text-[10px] text-brand font-black uppercase tracking-widest">Premium Video</span>
         </div>
       </div>
     </button>
