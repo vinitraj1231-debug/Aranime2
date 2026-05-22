@@ -103,7 +103,7 @@ export default function Home({ search = "", setSearch }: HomeProps) {
                 <div
                   key={item.id}
                   onClick={() => handleLinkClick(item)}
-                  className="w-56 sm:w-64 shrink-0 snap-start group relative aspect-video bg-bg-dark rounded-xl sm:rounded-2xl overflow-hidden border border-white/5 hover:border-brand/50 shadow-xl transition-all duration-300 cursor-pointer focus:outline-none"
+                  className="w-60 sm:w-72 shrink-0 snap-start group relative aspect-[16/10] bg-bg-dark rounded-xl sm:rounded-[1.25rem] overflow-hidden border border-white/[0.08] hover:border-brand/50 shadow-2xl transition-all duration-500 ease-out cursor-pointer focus:outline-none"
                 >
                   <img
                     src={item.thumbnail}
@@ -193,7 +193,7 @@ export default function Home({ search = "", setSearch }: HomeProps) {
            <div className="h-0.5 w-12 bg-white" />
            <div className="h-0.5 w-12 bg-brand" />
         </div>
-        <p className="text-[10px] font-black uppercase tracking-[0.4em] mb-2 text-white/30"> BLAZE NETWORK | AUTHORIZED ACCESS ONLY</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.4em] mb-2 text-white/30"> B BLAZE NETWORK | AUTHORIZED ACCESS ONLY</p>
         <p className="text-[9px] text-white/10 font-mono">ENCRYPTED TELEGRAM MINI APP DISTRIBUTION ENGINE</p>
       </div>
     </div>
