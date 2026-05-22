@@ -366,7 +366,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
                     onClick={() => setIsOpen(false)}
                     className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all font-bold text-sm text-left shadow-sm group"
                   >
-                    <span>Browse Anime Index</span>
+                    <span>Browse Index</span>
                     <ChevronRight className="w-4 h-4 text-white/30 group-hover:translate-x-1 group-hover:text-brand transition-all" />
                   </Link>
 
