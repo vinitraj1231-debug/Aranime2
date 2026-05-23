@@ -162,22 +162,24 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
 
   return (
     <>
-      <nav className="bg-bg-dark border-b border-white/5 sticky top-0 z-50 px-4 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <Link id="nav-logo" to="/" className="flex items-center gap-1 group shrink-0">
-            <span className="text-2xl font-black bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent uppercase tracking-tighter italic">
-              BLAZE
-            </span>
-          </Link>
+      <nav className="bg-bg-dark border-b border-white/5 sticky top-0 z-50 px-4 py-4">
+        <div className="max-w-7xl mx-auto flex items-center gap-4">
+          <div className="flex-1 flex justify-start">
+            <Link id="nav-logo" to="/" className="flex items-center gap-1 group shrink-0">
+              <span className="text-2xl font-black bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent uppercase tracking-tighter italic">
+                BLAZE
+              </span>
+            </Link>
+          </div>
 
           {/* Header Search Bar */}
-          <div className="relative group max-w-[140px] xs:max-w-[180px] sm:max-w-xs md:max-w-sm w-full mr-auto ml-12 px-1 sm:px-2">
-            <div className="absolute -inset-0.5 bg-brand/15 rounded-full blur opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
-            <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 w-3 h-3 text-white/30 group-focus-within:text-brand transition-colors" />
+          <div className="relative group max-w-[280px] xs:max-w-[350px] sm:max-w-md md:max-w-xl w-full px-2">
+            <div className="absolute -inset-1 bg-brand/20 rounded-full blur-md opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20 group-focus-within:text-brand transition-colors z-10" />
             <input 
               id="header-search-bar"
               type="text" 
-              placeholder="Search..."
+              placeholder="SEARCH CATALOG..."
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
@@ -187,7 +189,7 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
                   saveSearchQuery(search);
                 }
               }}
-              className="relative w-full bg-black/40 backdrop-blur-md border border-white/5 focus:border-brand/40 outline-none rounded-full py-1.5 pl-8 sm:pl-10 pr-4 text-[9px] sm:text-[10px] text-center transition-all placeholder:text-white/20 text-white shadow-inner font-bold tracking-wide"
+              className="relative w-full bg-black/60 backdrop-blur-2xl border border-white/10 focus:border-brand/50 focus:ring-4 focus:ring-brand/10 outline-none rounded-full py-3.5 px-12 text-sm sm:text-base text-center transition-all placeholder:text-white/10 text-white shadow-2xl font-black tracking-[0.2em] uppercase"
             />
 
             {/* Recent Searches Dropdown Panel */}
@@ -231,17 +233,19 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
           </div>
 
 
-          {/* 3-line Hamburger Menu representation */}
-          <button
-            id="nav-hamburger-btn"
-            onClick={() => setIsOpen(true)}
-            className="group flex flex-col gap-1 px-3 py-3 hover:bg-white/5 rounded-xl transition-all brightness-110 active:scale-95 shrink-0"
-            title="Menu"
-          >
-            <div className="w-5 h-[2px] bg-brand group-hover:translate-x-0.5 transition-transform" />
-            <div className="w-4 h-[2px] bg-white group-hover:w-5 transition-all" />
-            <div className="w-5 h-[2px] bg-brand group-hover:-translate-x-0.5 transition-transform" />
-          </button>
+          <div className="flex-1 flex justify-end">
+            {/* 3-line Hamburger Menu representation */}
+            <button
+              id="nav-hamburger-btn"
+              onClick={() => setIsOpen(true)}
+              className="group flex flex-col gap-1 px-3 py-3 hover:bg-white/5 rounded-xl transition-all brightness-110 active:scale-95 shrink-0"
+              title="Menu"
+            >
+              <div className="w-5 h-[2px] bg-brand group-hover:translate-x-0.5 transition-transform" />
+              <div className="w-4 h-[2px] bg-white group-hover:w-5 transition-all" />
+              <div className="w-5 h-[2px] bg-brand group-hover:-translate-x-0.5 transition-transform" />
+            </button>
+          </div>
         </div>
       </nav>
 
