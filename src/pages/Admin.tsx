@@ -42,6 +42,7 @@ export default function Admin() {
   const [timeframe, setTimeframe] = useState<7 | 14 | 30>(14);
   const [searchQuery, setSearchQuery] = useState("");
   const [profileSearchQuery, setProfileSearchQuery] = useState("");
+  const [grantId, setGrantId] = useState("");
   const [maintenance, setMaintenance] = useState(false);
   const [isUpdatingMaintenance, setIsUpdatingMaintenance] = useState(false);
   
@@ -50,15 +51,21 @@ export default function Admin() {
     title: '', 
     thumbnail: '', 
     link: '', 
+    premiumLink: '',
     category: 'Indian',
     keywords: '',
     rating: '8.5',
     isFeatured: false,
+    isPremium: false,
     videoType: 'redirect', // 'redirect' | 'video'
     videoUrl1080: '',
+    premiumVideoUrl1080: '',
     videoUrl720: '',
+    premiumVideoUrl720: '',
     videoUrl480: '',
+    premiumVideoUrl480: '',
     videoUrl360: '',
+    premiumVideoUrl360: '',
     videoAspect: 'horizontal' // 'horizontal' | 'vertical'
   });
   const [bannerForm, setBannerForm] = useState({ imageUrl: '', link: '', order: 0 });
@@ -151,15 +158,21 @@ export default function Admin() {
       title: animeForm.title,
       thumbnail: animeForm.thumbnail,
       link: animeForm.link || '',
+      premiumLink: animeForm.premiumLink || '',
       category: animeForm.category,
       keywords: animeForm.keywords,
       rating: parseFloat(animeForm.rating) || 8.5,
       isFeatured: animeForm.isFeatured,
+      isPremium: animeForm.isPremium,
       videoType: animeForm.videoType,
       videoUrl1080: animeForm.videoUrl1080 || '',
+      premiumVideoUrl1080: animeForm.premiumVideoUrl1080 || '',
       videoUrl720: animeForm.videoUrl720 || '',
+      premiumVideoUrl720: animeForm.premiumVideoUrl720 || '',
       videoUrl480: animeForm.videoUrl480 || '',
+      premiumVideoUrl480: animeForm.premiumVideoUrl480 || '',
       videoUrl360: animeForm.videoUrl360 || '',
+      premiumVideoUrl360: animeForm.premiumVideoUrl360 || '',
       videoAspect: animeForm.videoAspect || 'horizontal',
       clicks: 0, 
       createdAt: serverTimestamp(), 
@@ -170,15 +183,21 @@ export default function Admin() {
       title: '', 
       thumbnail: '', 
       link: '', 
+      premiumLink: '',
       category: 'Indian',
       keywords: '',
       rating: '8.5',
       isFeatured: false,
+      isPremium: false,
       videoType: 'redirect',
       videoUrl1080: '',
+      premiumVideoUrl1080: '',
       videoUrl720: '',
+      premiumVideoUrl720: '',
       videoUrl480: '',
+      premiumVideoUrl480: '',
       videoUrl360: '',
+      premiumVideoUrl360: '',
       videoAspect: 'horizontal'
     });
   };
@@ -187,6 +206,32 @@ export default function Admin() {
     await updateDoc(doc(db, "anime", id), {
       isFeatured: !currentFeatured
     });
+  };
+
+  const handleTogglePremium = async (id: string, currentPremium: boolean) => {
+    await updateDoc(doc(db, "anime", id), {
+      isPremium: !currentPremium
+    });
+  };
+
+  const handleToggleUserPremium = async (id: string, currentPremium: boolean) => {
+    await updateDoc(doc(db, "user_profiles", id), {
+      isPremium: !currentPremium
+    });
+  };
+
+  const handleGrantPremiumById = async () => {
+    if (!grantId.trim()) return;
+    try {
+      await updateDoc(doc(db, "user_profiles", grantId.trim()), {
+        isPremium: true
+      });
+      setGrantId("");
+      alert("Premium granted successfully!");
+    } catch (e) {
+      console.error(e);
+      alert("Error granting premium. Make sure the User ID is correct.");
+    }
   };
 
   const handleToggleMaintenance = async () => {
@@ -607,8 +652,9 @@ export default function Admin() {
                 </div>
 
                 {animeForm.videoType === 'redirect' ? (
-                  <div className="md:col-span-2 lg:col-span-3">
-                    <Input label="Target Redirect Link" value={animeForm.link} onChange={(v: string) => setAnimeForm({...animeForm, link: v})} required placeholder="Telegram channel or post link" />
+                  <div className="md:col-span-2 lg:col-span-3 space-y-4">
+                    <Input label="Standard Redirect Link" value={animeForm.link} onChange={(v: string) => setAnimeForm({...animeForm, link: v})} required placeholder="Telegram channel or post link" />
+                    <Input label="Premium Redirect Link (Optional)" value={animeForm.premiumLink} onChange={(v: string) => setAnimeForm({...animeForm, premiumLink: v})} placeholder="Link only for premium users" />
                   </div>
                 ) : (
                   <div className="md:col-span-2 lg:col-span-3 border border-brand/10 bg-brand/5 p-5 rounded-3xl space-y-4">
@@ -638,33 +684,65 @@ export default function Admin() {
                         </div>
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Input label="Video Main Direct Link (1080p / Source URL)" value={animeForm.videoUrl1080} onChange={(v: string) => setAnimeForm({...animeForm, videoUrl1080: v})} required placeholder="HTTPS link to direct video MP4 (1080p source)" />
-                      <Input label="Video Medium Quality Link (720p)" value={animeForm.videoUrl720} onChange={(v: string) => setAnimeForm({...animeForm, videoUrl720: v})} placeholder="HTTPS link to direct video MP4 (720p)" />
-                      <Input label="Video Low Quality Link (480p)" value={animeForm.videoUrl480} onChange={(v: string) => setAnimeForm({...animeForm, videoUrl480: v})} placeholder="HTTPS link to direct video MP4 (480p)" />
-                      <Input label="Video Mobile Quality Link (360p)" value={animeForm.videoUrl360} onChange={(v: string) => setAnimeForm({...animeForm, videoUrl360: v})} placeholder="HTTPS link to direct video MP4 (360p)" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h4 className="text-[9px] font-black text-white/40 uppercase tracking-widest border-b border-white/5 pb-1">Standard Source</h4>
+                        <Input label="1080p (Source)" value={animeForm.videoUrl1080} onChange={(v: string) => setAnimeForm({...animeForm, videoUrl1080: v})} required placeholder="MP4 URL" />
+                        <Input label="720p" value={animeForm.videoUrl720} onChange={(v: string) => setAnimeForm({...animeForm, videoUrl720: v})} placeholder="MP4 URL" />
+                        <Input label="480p" value={animeForm.videoUrl480} onChange={(v: string) => setAnimeForm({...animeForm, videoUrl480: v})} placeholder="MP4 URL" />
+                        <Input label="360p" value={animeForm.videoUrl360} onChange={(v: string) => setAnimeForm({...animeForm, videoUrl360: v})} placeholder="MP4 URL" />
+                      </div>
+                      <div className="space-y-4">
+                        <h4 className="text-[9px] font-black text-brand uppercase tracking-widest border-b border-brand/10 pb-1">Premium Source</h4>
+                        <Input label="Premium 1080p" value={animeForm.premiumVideoUrl1080} onChange={(v: string) => setAnimeForm({...animeForm, premiumVideoUrl1080: v})} placeholder="Premium MP4 URL" />
+                        <Input label="Premium 720p" value={animeForm.premiumVideoUrl720} onChange={(v: string) => setAnimeForm({...animeForm, premiumVideoUrl720: v})} placeholder="Premium MP4 URL" />
+                        <Input label="Premium 480p" value={animeForm.premiumVideoUrl480} onChange={(v: string) => setAnimeForm({...animeForm, premiumVideoUrl480: v})} placeholder="Premium MP4 URL" />
+                        <Input label="Premium 360p" value={animeForm.premiumVideoUrl360} onChange={(v: string) => setAnimeForm({...animeForm, premiumVideoUrl360: v})} placeholder="Premium MP4 URL" />
+                      </div>
                     </div>
                   </div>
                 )}
 
-                <div className="md:col-span-2 lg:col-span-3 flex items-center justify-between bg-bg-darker/60 border border-white/5 p-4 rounded-2xl">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs font-bold text-white flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-brand" /> Horizontally Scrollable Spotlight
-                    </span>
-                    <span className="text-[10px] text-white/45">Should this series appear in the horizontal featured carousel list?</span>
+                <div className="md:col-span-2 lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center justify-between bg-bg-darker/60 border border-white/5 p-4 rounded-2xl">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs font-bold text-white flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-brand" /> Spotlight
+                      </span>
+                      <span className="text-[10px] text-white/45">Featured carousel?</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setAnimeForm({...animeForm, isFeatured: !animeForm.isFeatured})}
+                      className={`px-6 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all ${
+                        animeForm.isFeatured
+                        ? 'bg-brand text-white shadow-md shadow-brand/20'
+                        : 'bg-white/5 text-white/40 border border-white/5 hover:bg-white/10'
+                      }`}
+                    >
+                      {animeForm.isFeatured ? "Active" : "No"}
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setAnimeForm({...animeForm, isFeatured: !animeForm.isFeatured})}
-                    className={`px-6 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all ${
-                      animeForm.isFeatured 
-                      ? 'bg-brand text-white shadow-md shadow-brand/20' 
-                      : 'bg-white/5 text-white/40 border border-white/5 hover:bg-white/10'
-                    }`}
-                  >
-                    {animeForm.isFeatured ? "Featured Active" : "No"}
-                  </button>
+
+                  <div className="flex items-center justify-between bg-bg-darker/60 border border-white/5 p-4 rounded-2xl">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs font-bold text-white flex items-center gap-2">
+                        <Trophy className="w-4 h-4 text-brand" /> Premium Tag
+                      </span>
+                      <span className="text-[10px] text-white/45">Mark as premium?</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setAnimeForm({...animeForm, isPremium: !animeForm.isPremium})}
+                      className={`px-6 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all ${
+                        animeForm.isPremium
+                        ? 'bg-brand text-white shadow-md shadow-brand/20'
+                        : 'bg-white/5 text-white/40 border border-white/5 hover:bg-white/10'
+                      }`}
+                    >
+                      {animeForm.isPremium ? "Premium" : "Standard"}
+                    </button>
+                  </div>
                 </div>
 
                 <button 
@@ -741,18 +819,32 @@ export default function Admin() {
                         </p>
                       )}
 
-                      {/* Featured button state */}
-                      <button
-                        onClick={() => handleToggleFeature(item.id, item.isFeatured || false)}
-                        className={`text-[9px] px-2.5 py-1 rounded font-black uppercase mt-3 inline-flex items-center gap-1 transition-all ${
-                          item.isFeatured 
-                          ? 'bg-yellow-400/20 text-yellow-400 border border-yellow-400/20' 
-                          : 'bg-white/5 text-white/40 border border-white/5 hover:text-white'
-                        }`}
-                      >
-                        <Sparkles className="w-2.5 h-2.5" />
-                        {item.isFeatured ? "Featured Top" : "Toggle Feature"}
-                      </button>
+                      <div className="flex items-center gap-2 mt-3">
+                        {/* Featured button state */}
+                        <button
+                          onClick={() => handleToggleFeature(item.id, item.isFeatured || false)}
+                          className={`text-[9px] px-2.5 py-1 rounded font-black uppercase inline-flex items-center gap-1 transition-all ${
+                            item.isFeatured
+                            ? 'bg-yellow-400/20 text-yellow-400 border border-yellow-400/20'
+                            : 'bg-white/5 text-white/40 border border-white/5 hover:text-white'
+                          }`}
+                        >
+                          <Sparkles className="w-2.5 h-2.5" />
+                          {item.isFeatured ? "Featured" : "Feature"}
+                        </button>
+
+                        <button
+                          onClick={() => handleTogglePremium(item.id, item.isPremium || false)}
+                          className={`text-[9px] px-2.5 py-1 rounded font-black uppercase inline-flex items-center gap-1 transition-all ${
+                            item.isPremium
+                            ? 'bg-brand/20 text-brand border border-brand/20'
+                            : 'bg-white/5 text-white/40 border border-white/5 hover:text-white'
+                          }`}
+                        >
+                          <Trophy className="w-2.5 h-2.5" />
+                          {item.isPremium ? "Premium" : "Standard"}
+                        </button>
+                      </div>
                     </div>
 
                     <button 
@@ -817,15 +909,32 @@ export default function Admin() {
                 </h2>
                 <p className="text-xs text-white/40 mt-1">Submitted directly by visitors via the navigation drawer</p>
               </div>
-              <div className="relative max-w-sm w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
-                <input 
-                  type="text" 
-                  placeholder="Search telegram names / usernames..." 
-                  value={profileSearchQuery}
-                  onChange={e => setProfileSearchQuery(e.target.value)}
-                  className="w-full bg-bg-dark border border-white/10 rounded-xl py-2.5 pl-9 pr-4 text-xs focus:border-brand/40 outline-none transition-all placeholder:text-white/15"
-                />
+              <div className="flex flex-col gap-2 w-full max-w-sm">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
+                  <input
+                    type="text"
+                    placeholder="Search names / usernames..."
+                    value={profileSearchQuery}
+                    onChange={e => setProfileSearchQuery(e.target.value)}
+                    className="w-full bg-bg-dark border border-white/10 rounded-xl py-2.5 pl-9 pr-4 text-xs focus:border-brand/40 outline-none transition-all placeholder:text-white/15"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Grant by User ID..."
+                    value={grantId}
+                    onChange={e => setGrantId(e.target.value)}
+                    className="flex-1 bg-bg-dark border border-white/10 rounded-xl py-2 px-3 text-[10px] focus:border-brand/40 outline-none transition-all placeholder:text-white/15"
+                  />
+                  <button
+                    onClick={handleGrantPremiumById}
+                    className="bg-brand px-3 py-2 rounded-xl text-[10px] font-black uppercase text-white shadow-lg shadow-brand/20 active:scale-95 transition-all"
+                  >
+                    Grant
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -838,7 +947,10 @@ export default function Admin() {
                       {(p.name || 'U').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h4 className="text-sm font-black text-white truncate">{p.name || "Anonymous User"}</h4>
+                      <h4 className="text-sm font-black text-white truncate flex items-center gap-1.5">
+                        {p.name || "Anonymous User"}
+                        {p.isPremium && <Trophy className="w-3 h-3 text-brand fill-current" />}
+                      </h4>
                       <p className="text-xs text-brand font-bold mt-0.5">
                         <a href={p.telegram ? (p.telegram.startsWith('@') ? `https://t.me/${p.telegram.substring(1)}` : `https://t.me/${p.telegram}`) : '#'} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-1">
                           {p.telegram ? (p.telegram.startsWith('@') ? p.telegram : `@${p.telegram}`) : '@username'}
@@ -860,6 +972,23 @@ export default function Admin() {
                       {p.bio}
                     </p>
                   )}
+
+                  <div className="mt-4 flex items-center gap-2">
+                    <button
+                      onClick={() => handleToggleUserPremium(p.id, p.isPremium || false)}
+                      className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 ${
+                        p.isPremium
+                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                        : 'bg-white/5 text-white/40 border border-white/5 hover:bg-white/10'
+                      }`}
+                    >
+                      {p.isPremium ? (
+                        <><Trophy className="w-3 h-3" /> Premium Active</>
+                      ) : (
+                        <><Lock className="w-3 h-3" /> Grant Premium</>
+                      )}
+                    </button>
+                  </div>
 
                   <div className="flex items-center justify-between border-t border-white/5 mt-4 pt-3 text-[10px] text-white/30 font-mono">
                     <span>RECORD_ID: {p.id.substring(0, 6)}...</span>

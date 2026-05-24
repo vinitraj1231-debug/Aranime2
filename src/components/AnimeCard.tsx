@@ -1,4 +1,4 @@
-import { Play } from "lucide-react";
+import { Play, Trophy } from "lucide-react";
 
 interface AnimeCardProps {
   anime: {
@@ -7,6 +7,7 @@ interface AnimeCardProps {
     clicks: number;
     category?: string;
     rating?: number;
+    isPremium?: boolean;
   };
   onClick: () => void;
 }
@@ -17,7 +18,7 @@ export default function AnimeCard({ anime, onClick }: AnimeCardProps) {
       onClick={onClick}
       className="group relative flex flex-col gap-4 text-left w-full focus:outline-none cursor-pointer"
     >
-      <div className="relative aspect-[16/10] rounded-[2rem] overflow-hidden bg-bg-dark border border-white/[0.08] shadow-2xl group-hover:border-brand/50 group-hover:shadow-[0_0_40px_rgba(244,117,33,0.2)] transition-all duration-700 ease-out">
+      <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-bg-dark border border-white/[0.08] shadow-2xl group-hover:border-brand/50 group-hover:shadow-[0_0_40px_rgba(244,117,33,0.2)] transition-all duration-700 ease-out">
         <img 
           src={anime.thumbnail} 
           alt={anime.title}
@@ -44,11 +45,19 @@ export default function AnimeCard({ anime, onClick }: AnimeCardProps) {
         <div className="absolute inset-0 p-4 flex flex-col justify-between pointer-events-none">
           <div className="flex items-start justify-between">
             {/* Category Badge */}
-            {anime.category && (
-              <div className="px-2.5 py-1 bg-brand/90 backdrop-blur-md rounded-lg text-[8px] font-black text-white uppercase tracking-widest shadow-xl border border-white/10 group-hover:scale-105 transition-transform">
-                {anime.category}
-              </div>
-            )}
+            <div className="flex flex-col gap-1.5 items-start">
+              {anime.category && (
+                <div className="px-2.5 py-1 bg-brand/90 backdrop-blur-md rounded-lg text-[8px] font-black text-white uppercase tracking-widest shadow-xl border border-white/10 group-hover:scale-105 transition-transform">
+                  {anime.category}
+                </div>
+              )}
+              {anime.isPremium && (
+                <div className="px-2.5 py-1 bg-yellow-500/90 backdrop-blur-md rounded-lg text-[8px] font-black text-white uppercase tracking-widest shadow-xl border border-white/10 group-hover:scale-105 transition-transform flex items-center gap-1">
+                  <Trophy className="w-2.5 h-2.5 fill-current" />
+                  Premium
+                </div>
+              )}
+            </div>
 
             {/* View Count Badge */}
             <div className="px-2 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[9px] font-bold text-white border border-white/10 uppercase tracking-widest shadow-xl flex items-center gap-1.5">

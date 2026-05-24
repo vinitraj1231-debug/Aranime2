@@ -9,17 +9,23 @@ interface Anime {
   id: string;
   title: string;
   thumbnail: string;
-  link: string;
   category?: string;
   keywords?: string;
   rating?: number;
   isFeatured?: boolean;
+  isPremium?: boolean;
   clicks: number;
   videoType?: "redirect" | "video";
+  link: string;
+  premiumLink?: string;
   videoUrl1080?: string;
+  premiumVideoUrl1080?: string;
   videoUrl720?: string;
+  premiumVideoUrl720?: string;
   videoUrl480?: string;
+  premiumVideoUrl480?: string;
   videoUrl360?: string;
+  premiumVideoUrl360?: string;
   videoAspect?: "horizontal" | "vertical";
 }
 
@@ -56,8 +62,17 @@ export default function AnimeGrid({ search = "", category = "All", sortBy = "lat
   });
 
   const handleLinkClick = async (item: Anime) => {
+    const isUserPremium = localStorage.getItem("ar_anime_user_premium") === "true";
+
     if (item.videoType === "video") {
-      window.dispatchEvent(new CustomEvent("ar_play_video", { detail: item }));
+      const videoData = { ...item };
+      if (isUserPremium) {
+        if (item.premiumVideoUrl1080) videoData.videoUrl1080 = item.premiumVideoUrl1080;
+        if (item.premiumVideoUrl720) videoData.videoUrl720 = item.premiumVideoUrl720;
+        if (item.premiumVideoUrl480) videoData.videoUrl480 = item.premiumVideoUrl480;
+        if (item.premiumVideoUrl360) videoData.videoUrl360 = item.premiumVideoUrl360;
+      }
+      window.dispatchEvent(new CustomEvent("ar_play_video", { detail: videoData }));
       return;
     }
 
@@ -75,13 +90,16 @@ export default function AnimeGrid({ search = "", category = "All", sortBy = "lat
           totalClicks: increment(1)
         }, { merge: true })
       ]);
-      if (item.link) {
-        window.open(item.link, '_blank');
+
+      const targetLink = (isUserPremium && item.premiumLink) ? item.premiumLink : item.link;
+      if (targetLink) {
+        window.open(targetLink, '_blank');
       }
     } catch (e) {
       console.error("Click logging error:", e);
-      if (item.link) {
-        window.open(item.link, '_blank');
+      const targetLink = (isUserPremium && item.premiumLink) ? item.premiumLink : item.link;
+      if (targetLink) {
+        window.open(targetLink, '_blank');
       }
     }
   };
