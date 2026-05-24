@@ -10,16 +10,22 @@ interface Anime {
   id: string;
   title: string;
   thumbnail: string;
-  link: string;
   category?: string;
   rating?: number;
   isFeatured?: boolean;
+  isPremium?: boolean;
   clicks: number;
   videoType?: "redirect" | "video";
+  link: string;
+  premiumLink?: string;
   videoUrl1080?: string;
+  premiumVideoUrl1080?: string;
   videoUrl720?: string;
+  premiumVideoUrl720?: string;
   videoUrl480?: string;
+  premiumVideoUrl480?: string;
   videoUrl360?: string;
+  premiumVideoUrl360?: string;
   videoAspect?: "horizontal" | "vertical";
 }
 
@@ -55,8 +61,17 @@ export default function Home({ search = "", setSearch }: HomeProps) {
   const topTrending = trendingAnime.slice(0, 15);
 
   const handleLinkClick = async (item: Anime) => {
+    const isUserPremium = localStorage.getItem("ar_anime_user_premium") === "true";
+
     if (item.videoType === "video") {
-      window.dispatchEvent(new CustomEvent("ar_play_video", { detail: item }));
+      const videoData = { ...item };
+      if (isUserPremium) {
+        if (item.premiumVideoUrl1080) videoData.videoUrl1080 = item.premiumVideoUrl1080;
+        if (item.premiumVideoUrl720) videoData.videoUrl720 = item.premiumVideoUrl720;
+        if (item.premiumVideoUrl480) videoData.videoUrl480 = item.premiumVideoUrl480;
+        if (item.premiumVideoUrl360) videoData.videoUrl360 = item.premiumVideoUrl360;
+      }
+      window.dispatchEvent(new CustomEvent("ar_play_video", { detail: videoData }));
       return;
     }
 
@@ -64,13 +79,15 @@ export default function Home({ search = "", setSearch }: HomeProps) {
       await updateDoc(doc(db, "anime", item.id), {
         clicks: increment(1)
       });
-      if (item.link) {
-        window.open(item.link, '_blank');
+      const targetLink = (isUserPremium && item.premiumLink) ? item.premiumLink : item.link;
+      if (targetLink) {
+        window.open(targetLink, '_blank');
       }
     } catch (e) {
       console.error(e);
-      if (item.link) {
-        window.open(item.link, '_blank');
+      const targetLink = (isUserPremium && item.premiumLink) ? item.premiumLink : item.link;
+      if (targetLink) {
+        window.open(targetLink, '_blank');
       }
     }
   };
@@ -103,7 +120,7 @@ export default function Home({ search = "", setSearch }: HomeProps) {
                 <div
                   key={item.id}
                   onClick={() => handleLinkClick(item)}
-                  className="w-56 sm:w-64 shrink-0 snap-start group relative aspect-[16/10] bg-bg-dark rounded-[1.8rem] overflow-hidden border border-white/[0.08] hover:border-brand/50 shadow-2xl transition-all duration-700 ease-out cursor-pointer focus:outline-none"
+                  className="w-56 sm:w-64 shrink-0 snap-start group relative aspect-[16/10] bg-bg-dark rounded-2xl overflow-hidden border border-white/[0.08] hover:border-brand/50 shadow-2xl transition-all duration-700 ease-out cursor-pointer focus:outline-none"
                 >
                   <img
                     src={item.thumbnail}
@@ -158,9 +175,9 @@ export default function Home({ search = "", setSearch }: HomeProps) {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-7 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all border-2 shadow-lg ${
+                className={`px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.15em] whitespace-nowrap transition-all border-2 shadow-lg ${
                   selectedCategory === cat 
-                  ? 'bg-brand border-brand text-white shadow-brand/40 scale-110'
+                  ? 'bg-brand border-brand text-white shadow-brand/40 scale-105'
                   : 'bg-bg-dark/60 backdrop-blur-xl border-white/5 text-white/40 hover:text-white hover:bg-white/10 hover:border-white/10'
                 }`}
               >

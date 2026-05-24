@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, FormEvent, MouseEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
 interface NavbarProps {
@@ -119,7 +119,8 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
           localStorage.setItem("ar_anime_profile_photo", currentPhoto);
           localStorage.setItem("ar_anime_profile_saved", "true");
 
-          await setDoc(doc(db, "user_profiles", uId), {
+          const userDoc = doc(db, "user_profiles", uId);
+          await setDoc(userDoc, {
             id: uId,
             name: name,
             telegram: username,
@@ -127,6 +128,15 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
             photoUrl: currentPhoto,
             createdAt: new Date().toISOString()
           }, { merge: true });
+        }
+
+        // Always check premium status on load/sync
+        const uId2 = getUserId();
+        const userDocRef = doc(db, "user_profiles", uId2);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const isPremium = userDocSnap.data().isPremium || false;
+          localStorage.setItem("ar_anime_user_premium", isPremium.toString());
         }
       } catch (err) {
         console.error("Auto sync profile failed:", err);
@@ -164,76 +174,73 @@ export default function Navbar({ user, isAdmin, search = "", setSearch }: Navbar
     <>
       <nav className="bg-bg-dark border-b border-white/5 sticky top-0 z-50 px-4 py-4">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <div className="flex-1 flex justify-start">
+          <div className="flex justify-start">
             <Link id="nav-logo" to="/" className="flex items-center gap-1 group shrink-0">
-              <span className="text-2xl font-black bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent uppercase tracking-tighter italic">
+              <span className="text-xl sm:text-2xl font-black bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent uppercase tracking-tighter italic">
                 BLAZE
               </span>
             </Link>
           </div>
 
-          {/* Header Search Bar */}
-          <div className="relative group max-w-[280px] xs:max-w-[350px] sm:max-w-md md:max-w-xl w-full px-2">
-            <div className="absolute -inset-1 bg-brand/20 rounded-full blur-md opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20 group-focus-within:text-brand transition-colors z-10" />
-            <input 
-              id="header-search-bar"
-              type="text" 
-              placeholder="SEARCH CATALOG..."
-              value={search}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  saveSearchQuery(search);
-                }
-              }}
-              className="relative w-full bg-black/60 backdrop-blur-2xl border border-white/10 focus:border-brand/50 focus:ring-4 focus:ring-brand/10 outline-none rounded-full py-3.5 px-12 text-sm sm:text-base text-center transition-all placeholder:text-white/10 text-white shadow-2xl font-black tracking-[0.2em] uppercase"
-            />
+          <div className="flex-1 flex justify-end items-center gap-2">
+            {/* Header Search Bar */}
+            <div className="relative group max-w-[150px] xs:max-w-[200px] sm:max-w-[250px] w-full">
+              <div className="absolute -inset-1 bg-brand/20 rounded-full blur-md opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
+              <input
+                id="header-search-bar"
+                type="text"
+                placeholder="SEARCH..."
+                value={search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    saveSearchQuery(search);
+                  }
+                }}
+                className="relative w-full bg-black/60 backdrop-blur-2xl border border-white/10 focus:border-brand/50 focus:ring-4 focus:ring-brand/10 outline-none rounded-full py-2 px-6 text-[10px] sm:text-xs text-center transition-all placeholder:text-white/10 text-white shadow-2xl font-black tracking-[0.1em] uppercase"
+              />
 
-            {/* Recent Searches Dropdown Panel */}
-            <AnimatePresence>
-              {isSearchFocused && recentSearches.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute left-1 sm:left-4 right-1 sm:right-4 mt-2 bg-[#0d0d0f] border border-white/5 rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl max-h-60"
-                >
-                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-white/[0.01]">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-brand flex items-center gap-1.5">
-                      <History className="w-3.5 h-3.5 opacity-80" /> Recent Searches
-                    </span>
-                    <button
-                      onMouseDown={(e) => handleClearRecent(e)}
-                      className="text-[9px] font-black uppercase text-white/30 hover:text-red-400 transition-colors flex items-center gap-1"
-                    >
-                      <Trash2 className="w-3 h-3" /> Clear
-                    </button>
-                  </div>
-                  <div className="py-1">
-                    {recentSearches.map((item, idx) => (
+              {/* Recent Searches Dropdown Panel */}
+              <AnimatePresence>
+                {isSearchFocused && recentSearches.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute left-0 right-0 mt-2 bg-[#0d0d0f] border border-white/5 rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl max-h-60"
+                  >
+                    <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-white/[0.01]">
+                      <span className="text-[9px] font-black uppercase tracking-wider text-brand flex items-center gap-1.5">
+                        <History className="w-3 h-3 opacity-80" /> Recent
+                      </span>
                       <button
-                        key={idx}
-                        onMouseDown={() => {
-                          handleSearchChange(item);
-                          saveSearchQuery(item);
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-white/5 text-xs text-white/70 hover:text-brand transition-colors flex items-center gap-2 font-medium"
+                        onMouseDown={(e) => handleClearRecent(e)}
+                        className="text-[8px] font-black uppercase text-white/30 hover:text-red-400 transition-colors flex items-center gap-1"
                       >
-                        <History className="w-3 h-3 text-white/20" />
-                        <span className="truncate">{item}</span>
+                        <Trash2 className="w-2.5 h-2.5" /> Clear
                       </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-
-          <div className="flex-1 flex justify-end">
+                    </div>
+                    <div className="py-1">
+                      {recentSearches.map((item, idx) => (
+                        <button
+                          key={idx}
+                          onMouseDown={() => {
+                            handleSearchChange(item);
+                            saveSearchQuery(item);
+                          }}
+                          className="w-full text-left px-4 py-1.5 hover:bg-white/5 text-[10px] text-white/70 hover:text-brand transition-colors flex items-center gap-2 font-medium"
+                        >
+                          <History className="w-2.5 h-2.5 text-white/20" />
+                          <span className="truncate">{item}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             {/* 3-line Hamburger Menu representation */}
             <button
               id="nav-hamburger-btn"
