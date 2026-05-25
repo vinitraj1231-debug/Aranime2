@@ -135,7 +135,7 @@ export default function AnimeGrid({ search = "", category = "All", sortBy = "lat
       
       {sortedItems.length === 0 && (
         <div className="col-span-full py-20 text-center text-white/30">
-          <p className="text-lg">No anime found{search ? ` for "${search}"` : ""}.</p>
+          <p className="text-lg">No item found{search ? ` for "${search}"` : ""}.</p>
           <p className="text-sm">Try a different search term or come back later!</p>
         </div>
       )}
